@@ -94,7 +94,7 @@ class DataRepository implements DataRepositoryInterface
         /** @var PersistableDataInterface $persistableData */
         $persistableData = new $persistableDataClass();
 
-        if (!null === $identifier) {
+        if (null !== $identifier) {
             $persistableData->setIdentifier($identifier);
         }
 
