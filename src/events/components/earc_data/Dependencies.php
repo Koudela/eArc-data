@@ -30,7 +30,7 @@ use eArc\EventTree\Interfaces\EventListenerInterface;
 /**
  * Defines dependencies earc/data uses.
  */
-class Bootstrap implements EventListenerInterface
+class Dependencies implements EventListenerInterface
 {
     const EARC_LISTENER_PATIENCE = 10;
 
