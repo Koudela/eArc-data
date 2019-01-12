@@ -1,0 +1,25 @@
+{
+    "name": "earc/data",
+    "description": "eArc - the explicit architecture framework - data component",
+    "type": "library",
+    "license": "MIT",
+    "version": "0.0-ALPHA",
+    "authors": [
+        {
+            "name": "Thomas Koudela",
+            "email": "thomas@koudela.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable" : true,
+    "require": {
+        "php": "^7.2",
+        "earc/component-di": "dev-master"
+    },
+    "autoload": {
+        "psr-4" : {
+            "eArc\\Data\\" : "src/",
+            "eArc\\DataTests\\" : "tests/"
+        }
+    }
+}
