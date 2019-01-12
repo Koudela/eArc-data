@@ -35,7 +35,7 @@ class Functions implements EventListenerInterface
 
         $earcDataEvent = $event;
 
-        if (!function_exists('\\eArc\\Data\\events\\components\\earc_user\\randomLowerAlphaNumericalString'))
+        if (!function_exists('\\eArc\\Data\\events\\components\\earc_data\\randomLowerAlphaNumericalString'))
         {
             /**
              * Get a random string composed of lower english letters and decimal
