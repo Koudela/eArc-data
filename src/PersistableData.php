@@ -21,11 +21,7 @@ class PersistableData implements PersistableDataInterface
     protected $data;
 
     /**
-     * Get the identifier of the object/data. A string that is unique to the
-     * type of object/data. May return null if the persisted data the object
-     * belongs to does not exist yet.
-     *
-     * @return string|null
+     * @inheritdoc
      */
     public function getIdentifier(): ?string
     {
@@ -33,9 +29,7 @@ class PersistableData implements PersistableDataInterface
     }
 
     /**
-     * Set the identifier of the object/data.
-     *
-     * @param string $identifier
+     * @inheritdoc
      */
     public function setIdentifier(string $identifier): void
     {
@@ -43,9 +37,7 @@ class PersistableData implements PersistableDataInterface
     }
 
     /**
-     * Set the data of the object.
-     *
-     * @param mixed $data
+     * @inheritdoc
      */
     public function set($data): void
     {
@@ -53,9 +45,7 @@ class PersistableData implements PersistableDataInterface
     }
 
     /**
-     * Get the data of the object.
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function get()
     {

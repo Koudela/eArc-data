@@ -8,17 +8,17 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\User\events\components\earc_user;
+namespace eArc\Data\events\components\earc_data;
 
 use eArc\Data\Data;
 use eArc\Data\DataFactory;
 use eArc\Data\DataRepository;
 use eArc\Data\Exceptions\DataException;
+use eArc\Data\Exceptions\DataExistsException;
 use eArc\Data\Exceptions\NoDataException;
 use eArc\Data\Interfaces\Application\DataInterface;
 use eArc\Data\Interfaces\Application\DataRepositoryInterface;
 use eArc\Data\Interfaces\Exceptions\DataExceptionInterface;
-use eArc\Data\Interfaces\Exceptions\DataExistsException;
 use eArc\Data\Interfaces\Exceptions\DataExistsExceptionInterface;
 use eArc\Data\Interfaces\Exceptions\NoDataExceptionInterface;
 use eArc\Data\Interfaces\Persistence\DataFactoryInterface;

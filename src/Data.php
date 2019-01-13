@@ -34,7 +34,7 @@ class Data implements DataInterface
      */
     public function getIdentifier(): ?string
     {
-        $this->persistableData->getIdentifier();
+        return $this->persistableData->getIdentifier();
     }
 
     /**
@@ -42,7 +42,7 @@ class Data implements DataInterface
      */
     public function get()
     {
-        $this->persistableData->get();
+        return $this->persistableData->get();
     }
 
     /**

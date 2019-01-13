@@ -8,7 +8,7 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\User\events\components\earc_data;
+namespace eArc\Data\events\components\earc_data;
 
 use eArc\EventTree\Event;
 use eArc\EventTree\Interfaces\EventListenerInterface;
@@ -28,7 +28,7 @@ class Parameter implements EventListenerInterface
     public function process(Event $event)
     {
         return [
-            'path.var.data' => dirname(__DIR__, 4) . '/var/data',
+            'path.var.data' => dirname(__DIR__, 4) . '/local/var/data',
         ];
     }
 }

@@ -15,6 +15,7 @@ use function eArc\Data\events\components\earc_data\getClassName;
 use eArc\Data\Interfaces\Application\DataInterface;
 use eArc\Data\Interfaces\Application\DataRepositoryInterface;
 use eArc\Data\Interfaces\Exceptions\DataExceptionInterface;
+use eArc\Data\Interfaces\Exceptions\DataExistsExceptionInterface;
 use eArc\Data\Interfaces\Exceptions\NoDataExceptionInterface;
 use eArc\Data\Interfaces\Persistence\DataFactoryInterface;
 use eArc\Data\Interfaces\Persistence\PersistableDataInterface;
@@ -31,7 +32,7 @@ class DataRepository implements DataRepositoryInterface
     protected $path;
 
     /** @var DataInterface[] */
-    protected $data;
+    protected $data = [];
 
     public function __construct(
         DataFactoryInterface $dataFactory,
@@ -95,12 +96,18 @@ class DataRepository implements DataRepositoryInterface
         $persistableData = new $persistableDataClass();
 
         if (null !== $identifier) {
+            if (isset($this->data[$identifier]) || is_file($this->path.'/'.$identifier.'.data')) {
+                $dataExistsExceptionClass = getClassName(DataExistsExceptionInterface::class);
+                throw new $dataExistsExceptionClass();
+            }
             $persistableData->setIdentifier($identifier);
         }
 
         $data = $this->dataFactory->make($persistableData);
 
         $this->createIdentifier($data);
+
+        $this->data[$data->getIdentifier()] = $data;
 
         $this->update($data);
 
@@ -127,7 +134,10 @@ class DataRepository implements DataRepositoryInterface
     public function delete(string $identifier): void
     {
         unset($this->data[$identifier]);
-        unlink($this->path.'/'.$identifier.'.data');
+        $file = $this->path.'/'.$identifier.'.data';
+        if (is_file($file)) {
+            unlink($file);
+        }
     }
 
     /**
@@ -163,8 +173,6 @@ class DataRepository implements DataRepositoryInterface
             do {
                 $identifier = randomLowerAlphaNumericalString();
             } while (isset($this->data[$identifier]) || is_file($this->path.'/'.$identifier.'.data'));
-
-            $this->data[$identifier] = $data;
 
             $data->expose()->setIdentifier($identifier);
         }

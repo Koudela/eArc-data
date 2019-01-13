@@ -21,5 +21,8 @@
             "eArc\\Data\\" : "src/",
             "eArc\\DataTests\\" : "tests/"
         }
+    },
+    "require-dev": {
+        "behat/behat": "^3.5"
     }
 }

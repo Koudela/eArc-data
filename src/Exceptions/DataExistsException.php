@@ -8,9 +8,9 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Interfaces\Exceptions;
+namespace eArc\Data\Exceptions;
 
-use eArc\Data\Exceptions\DataException;
+use eArc\Data\Interfaces\Exceptions\DataExistsExceptionInterface;
 
 /**
  * Data exists exception.
