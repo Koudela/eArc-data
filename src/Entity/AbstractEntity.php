@@ -8,14 +8,17 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Exceptions;
+namespace eArc\DataStore\Entity;
 
-use eArc\DataStore\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
+use eArc\DataStore\Entity\Interfaces\EntityInterface;
 
-/**
- * Generic data exception.
- */
-class DataException extends RuntimeException implements DataExceptionInterface
+abstract class AbstractEntity implements EntityInterface
 {
+    /** @var string|null */
+    protected $primaryKey;
+
+    public function getPrimaryKey(): ?string
+    {
+        return $this->primaryKey;
+    }
 }

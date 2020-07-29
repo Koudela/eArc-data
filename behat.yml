@@ -1,6 +1,0 @@
-default:
-  suites:
-    default:
-      paths: [ "%paths.base%/tests/features" ]
-      contexts:
-        - eArc\DataTests\env\FeatureContext

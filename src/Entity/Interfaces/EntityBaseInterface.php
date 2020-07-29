@@ -8,14 +8,8 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Exceptions;
+namespace eArc\DataStore\Entity\Interfaces;
 
-use eArc\DataStore\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
-
-/**
- * Generic data exception.
- */
-class DataException extends RuntimeException implements DataExceptionInterface
+interface EntityBaseInterface
 {
 }

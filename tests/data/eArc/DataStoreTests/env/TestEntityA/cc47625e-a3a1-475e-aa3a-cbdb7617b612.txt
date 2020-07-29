@@ -1,0 +1,1 @@
+{"publicVar":42,"protectedVar":"overwrite","privateVar":false,"primaryKey":"cc47625e-a3a1-475e-aa3a-cbdb7617b612"}

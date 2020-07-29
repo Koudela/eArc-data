@@ -2,19 +2,19 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data
- * @link https://github.com/Koudela/eArc-data/
+ * @package earc/data-store
+ * @link https://github.com/Koudela/eArc-data-store/
  * @copyright Copyright (c) 2019 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\events\components\earc_data;
+namespace eArc\DataStore\events\components\earc_data;
 
 use eArc\EventTree\Event;
 use eArc\EventTree\Interfaces\EventListenerInterface;
 
 /**
- * Defines parameter used by earc/data.
+ * Defines parameter used by earc/data-store.
  */
 class Parameter implements EventListenerInterface
 {

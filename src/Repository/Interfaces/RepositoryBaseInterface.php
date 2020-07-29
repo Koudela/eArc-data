@@ -8,14 +8,16 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Exceptions;
-
-use eArc\DataStore\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
+namespace eArc\DataStore\Repository\Interfaces;
 
 /**
- * Generic data exception.
+ * A Repository is always related to a entity class
  */
-class DataException extends RuntimeException implements DataExceptionInterface
+interface RepositoryBaseInterface
 {
+    /**
+     * Get the fully qualified class name of the entity the repository is
+     * related to.
+     */
+    public function getEntityName(): string;
 }

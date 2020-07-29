@@ -1,112 +1,56 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data
- * @link https://github.com/Koudela/eArc-data/
- * @copyright Copyright (c) 2019 Thomas Koudela
+ * @package earc/data-store
+ * @link https://github.com/Koudela/eArc-data-store/
+ * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\events\components\earc_data;
+namespace eArc\DataStore\events\components\earc_data;
 
-use function eArc\ComponentDI\events\components\earc_component_d_i\getClassName as getComponentDIClassName;
-use eArc\ComponentDI\Interfaces\Exceptions\InvalidConfigurationExceptionInterface;
-use eArc\ComponentDI\ComponentContainer;
-use eArc\DI\Interfaces\ContainerInterface;
-use eArc\EventTree\Event;
-use eArc\EventTree\Interfaces\EventListenerInterface;
 
 /**
- * Defines functions used by earc/data.
+ * Creates an unique object/data identifier string.
+ *
+ * @param DataInterface $data
  */
-class Functions implements EventListenerInterface
+function createIdentifier($data, $path): void
 {
-    const EARC_LISTENER_PATIENCE = -20;
+    $identifier = $data->getIdentifier();
 
-    const EARC_LISTENER_COMPONENT_DEPENDENCIES = [];
+    if (null === $identifier) {
+        do {
+            $identifier = randomLowerAlphaNumericalString();
+        } while (isset($data[$identifier]) || is_file($path.'/'.$identifier.'.data'));
 
+        $data->expose()->setIdentifier($identifier);
+    }
+}
+
+if (!function_exists('\\eArc\\DataStore\\events\\components\\earc_data\\randomLowerAlphaNumericalString')) {
     /**
-     * @inheritdoc
+     * Get a random string composed of lower english letters and decimal
+     * digits.
+     *
+     * @param int $length
+     *
+     * @return string
      */
-    public function process(Event $event)
+    function randomLowerAlphaNumericalString(int $length = 64): string
     {
-        global $earcDataEvent;
+        $randStr = '';
 
-        $earcDataEvent = $event;
-
-        if (!function_exists('\\eArc\\Data\\events\\components\\earc_data\\randomLowerAlphaNumericalString'))
-        {
-            /**
-             * Get a random string composed of lower english letters and decimal
-             * digits.
-             *
-             * @param int $length
-             *
-             * @return string
-             */
-            function randomLowerAlphaNumericalString(int $length = 64): string
-            {
-                $randStr = '';
-
-                for ($i = 0; $i < $length; $i++) {
-                    try {
-                        $randInt = random_int(48, 83);
-                    } catch (\Exception $exception) {
-                        $randInt = rand(48, 83);
-                    }
-                    $randStr .= chr($randInt < 58 ? $randInt : $randInt + 39);
-                }
-
-                return $randStr;
+        for ($i = 0; $i < $length; $i++) {
+            try {
+                $randInt = random_int(48, 83);
+            } catch (\Exception $exception) {
+                $randInt = rand(48, 83);
             }
+            $randStr .= chr($randInt < 58 ? $randInt : $randInt + 39);
         }
 
-        if (!function_exists('\\eArc\\Data\\events\\components\\earc_data\\getComponentContainer'))
-        {
-            /**
-             * Get the components container.
-             *
-             * @return ContainerInterface
-             */
-            function getComponentContainer(): ContainerInterface
-            {
-                /** @var Event $earcDataEvent */
-                global $earcDataEvent;
-
-                return $earcDataEvent->get(ComponentContainer::CONTAINER_BAG)->get('earc_data');
-            }
-        }
-
-        if (!function_exists('\\eArc\\Data\\events\\components\\earc_data\\getClassName'))
-        {
-            /**
-             * Get the class implementing the interface for the earc_data
-             * component.
-             *
-             * @param string $interfaceName
-             *
-             * @return string
-             */
-            function getClassName(string $interfaceName): string
-            {
-                $className = getComponentContainer()->get($interfaceName);
-
-                if (!is_subclass_of($className, $interfaceName)) {
-                    $invalidConfigurationExceptionClass = getComponentDIClassName(
-                        InvalidConfigurationExceptionInterface::class
-                    );
-                    throw new $invalidConfigurationExceptionClass(sprintf(
-                        '`%s` has to implement `%s`',
-                        $className,
-                        $interfaceName
-                    ));
-                }
-
-                return $className;
-            }
-        }
-
-        return [];
+        return $randStr;
     }
 }

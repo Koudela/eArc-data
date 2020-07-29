@@ -10,12 +10,11 @@
 
 namespace eArc\DataStore\Exceptions;
 
-use eArc\DataStore\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
+use eArc\DataStore\Exceptions\Interfaces\NoIndexExceptionInterface;
 
 /**
- * Generic data exception.
+ * Is no index exception.
  */
-class DataException extends RuntimeException implements DataExceptionInterface
+class NoIndexException extends DataException implements NoIndexExceptionInterface
 {
 }
