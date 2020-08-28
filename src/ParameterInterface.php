@@ -2,14 +2,15 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Exceptions\Interfaces;
+namespace eArc\Data;
 
-interface QueryExceptionInterface extends DataExceptionInterface
+interface ParameterInterface
 {
+    const DATA_PATH = 'earc.data.path';
 }

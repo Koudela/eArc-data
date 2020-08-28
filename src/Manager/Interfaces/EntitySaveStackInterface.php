@@ -2,21 +2,21 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Manager\Interfaces;
+namespace eArc\Data\Manager\Interfaces;
 
-use eArc\DataStore\Entity\Interfaces\EntityInterface;
-use eArc\Serializer\Exceptions\SerializeException;
+use eArc\Data\Entity\Interfaces\EntityInterface;
+use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
 
 interface EntitySaveStackInterface
 {
     /**
-     * This is the only method of the earc/data-store allowed to generate new
+     * This is the only method of the earc/data allowed to generate new
      * primary keys. On calling the method the entity gets its primary key and
      * is added to the entity save stack.
      *
@@ -25,7 +25,7 @@ interface EntitySaveStackInterface
      *
      * @param EntityInterface $entity
      *
-     * @throws SerializeException
+     * @throws SerializeExceptionInterface
      */
     public static function requirePrimaryKey(EntityInterface $entity): void;
 
@@ -41,14 +41,14 @@ interface EntitySaveStackInterface
      *
      * @param EntityInterface $entity
      *
-     * @throws SerializeException
+     * @throws SerializeExceptionInterface
      */
     public static function afterEntitySaved(EntityInterface $entity): void;
 
     /**
      * This method is called every time an entity is removed.
      *
-     * @throws SerializeException
+     * @throws SerializeExceptionInterface
      *
      * @param EntityInterface $entity
      */

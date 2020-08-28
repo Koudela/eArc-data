@@ -2,18 +2,18 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Collection;
+namespace eArc\Data\Collection;
 
-use eArc\DataStore\Collection\Interfaces\EmbeddedCollectionInterface;
-use eArc\DataStore\Entity\Interfaces\EmbeddedEntityInterface;
-use eArc\DataStore\Exceptions\HomogeneityException;
-use eArc\DataStore\Exceptions\QueryException;
+use eArc\Data\Collection\Interfaces\EmbeddedCollectionInterface;
+use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
+use eArc\Data\Exceptions\HomogeneityException;
+use eArc\QueryLanguage\Exception\QueryException;
 use ReflectionClass;
 use ReflectionException;
 

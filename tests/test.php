@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-use eArc\DataStore\Manager\DataStore;
-use eArc\DataStoreTests\env\TestEntityB;
+use eArc\Data\Manager\DataStore;
+use eArc\DataTests\env\TestEntityB;
 use eArc\DI\DI;
-use function eArc\DataStore\Manager\data_delete;
-use function eArc\DataStore\Manager\data_load;
-use function eArc\DataStore\Manager\data_save;
+use function eArc\Data\Manager\data_delete;
+use function eArc\Data\Manager\data_load;
+use function eArc\Data\Manager\data_save;
 
 include __DIR__.'/../vendor/autoload.php';
 
@@ -19,7 +19,7 @@ foreach(di_get(DataStore::class)->getRepository(TestEntityB::class)->find() as $
     //var_dump(data_load(TestEntityA::class, $primaryKey));
     var_dump($primaryKey);
     $entity = data_load(TestEntityB::class, $primaryKey);
-    $entity->setSomeValue(rand(0,5));
+    $entity->setSomeValue(rand(0,50));
     data_save($entity);
 //    /** @var TestEntityA $entity */
 //    $entity = $uniqueFactory->load();

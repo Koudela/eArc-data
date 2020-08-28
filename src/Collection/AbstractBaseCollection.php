@@ -2,17 +2,18 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Collection;
+namespace eArc\Data\Collection;
 
-use eArc\DataStore\Collection\Interfaces\CollectionBaseInterface;
-use eArc\DataStore\Entity\Interfaces\EntityBaseInterface;
-use eArc\DataStore\Repository\Interfaces\RepositoryBaseInterface;
+use eArc\Data\Collection\Interfaces\CollectionBaseInterface;
+use eArc\Data\Entity\Interfaces\EntityBaseInterface;
+use eArc\Data\Repository\Interfaces\RepositoryBaseInterface;
+use Generator;
 
 abstract class AbstractBaseCollection implements CollectionBaseInterface, RepositoryBaseInterface
 {
@@ -27,7 +28,7 @@ abstract class AbstractBaseCollection implements CollectionBaseInterface, Reposi
      * @param EntityBaseInterface $owner
      * @param string $fQCN
      */
-    public function __construct($owner, string $fQCN)
+    public function __construct(EntityBaseInterface $owner, string $fQCN)
     {
         $this->owner = $owner;
         $this->fQCN = $fQCN;
@@ -43,7 +44,7 @@ abstract class AbstractBaseCollection implements CollectionBaseInterface, Reposi
         return $this->items;
     }
 
-    public function getIterator()
+    public function getIterator(): Generator
     {
         foreach ($this->items as $key => $value) {
             yield $key => $value;

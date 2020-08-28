@@ -2,25 +2,26 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Serialization\DataTypes;
+namespace eArc\Data\Serialization\DataTypes;
 
-use eArc\DataStore\Collection\Collection;
-use eArc\DataStore\Collection\Interfaces\CollectionInterface;
-use eArc\DataStore\Entity\Interfaces\EntityBaseInterface;
-use eArc\DataStore\Entity\Interfaces\Cascade\CascadePersistInterface;
-use eArc\DataStore\Manager\DataStore;
-use eArc\DataStore\Manager\Interfaces\EntityProxyInterface;
-use eArc\DataStore\Manager\StaticEntitySaveStack;
+use eArc\Data\Collection\Collection;
+use eArc\Data\Collection\Interfaces\CollectionInterface;
+use eArc\Data\Entity\Interfaces\EntityBaseInterface;
+use eArc\Data\Entity\Interfaces\Cascade\CascadePersistInterface;
+use eArc\Data\Manager\DataStore;
+use eArc\Data\Manager\StaticEntitySaveStack;
 use eArc\Serializer\DataTypes\Interfaces\DataTypeInterface;
 use eArc\Serializer\Exceptions\SerializeException;
+use eArc\Serializer\SerializerTypes\Interfaces\SerializerTypeInterface;
 use ReflectionClass;
 use ReflectionException;
+use function eArc\Data\Manager\data_load;
 
 class CollectionInterfaceDataType implements DataTypeInterface
 {
@@ -29,24 +30,18 @@ class CollectionInterfaceDataType implements DataTypeInterface
         return $propertyValue instanceof CollectionInterface;
     }
 
-    public function serialize(?object $object, $propertyName, $propertyValue)
+    public function serialize(?object $object, $propertyName, $propertyValue, SerializerTypeInterface $serializerType)
     {
         try {
             /** @var CollectionInterface $propertyValue */
             $collectionReflection = new ReflectionClass($propertyValue);
             $items = $collectionReflection->getProperty('items')->getValue($propertyValue);
-            /** @var EntityProxyInterface $item */
-            foreach ($items as $item) {
-                if (null === $item->getPrimaryKey()) {
-                    di_static(StaticEntitySaveStack::class)::requirePrimaryKey($item->load());
-                }
-            }
 
             if ($object instanceof CascadePersistInterface) {
                 if (array_key_exists($propertyName, $object::getCascadeOnPersistProperties())) {
-                    foreach ($items as $item) {
-                        if (di_get(DataStore::class)->isLoaded($item->getEntityName(), $item->getPrimaryKey())) {
-                            di_static(StaticEntitySaveStack::class)::addToStack($item->load());
+                    foreach ($items as $primaryKey) {
+                        if (di_get(DataStore::class)->isLoaded($propertyValue->getEntityName(), $primaryKey)) {
+                            di_static(StaticEntitySaveStack::class)::addToStack(data_load($propertyValue->getEntityName(), $primaryKey));
                         }
                     }
                 }
@@ -56,7 +51,7 @@ class CollectionInterfaceDataType implements DataTypeInterface
                 $entityArray[$propertyName] = [
                     'interface' => CollectionInterface::class,
                     'fQCN' => $propertyValue->getEntityName(),
-                    'primaryKeys' => $propertyValue->find(),
+                    'primaryKeys' => $items,
                 ];
             }
         } catch (ReflectionException $e) {
@@ -69,10 +64,11 @@ class CollectionInterfaceDataType implements DataTypeInterface
         return is_subclass_of($type, CollectionInterface::class, true);
     }
 
-    public function deserialize(?object $object, string $type, $value)
+    public function deserialize(?object $object, string $type, $value, SerializerTypeInterface $serializerType): Collection
     {
         /** @var EntityBaseInterface $object */
         $collection = new Collection($object, $value['fQCN']);
+
         foreach ($value['primaryKeys'] as $primaryKey) {
             $collection->add($primaryKey);
         }

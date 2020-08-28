@@ -2,43 +2,29 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Collection;
+namespace eArc\Data\Collection;
 
-use eArc\DataStore\Collection\Interfaces\CollectionInterface;
-use eArc\DataStore\Entity\Interfaces\EntityInterface;
-use eArc\DataStore\Manager\UniqueEntityProxy;
-use eArc\DataStore\Exceptions\HomogeneityException;
-use function eArc\DataStore\Manager\data_find;
+use eArc\Data\Collection\Interfaces\CollectionInterface;
+use eArc\Data\Entity\Interfaces\EntityInterface;
+use eArc\Data\Exceptions\HomogeneityException;
+use function eArc\Data\Manager\data_find;
 
 class Collection extends AbstractBaseCollection implements CollectionInterface
 {
     public function find(?string $query = null): array
     {
-        $allPrimaryKeys = [];
-
-        /** @var UniqueEntityProxy $item */
-        foreach ($this->items as $item) {
-            // TODO: better solution
-            if (null !== $item->getPrimaryKey()) {
-                $allPrimaryKeys[$item->getPrimaryKey()] = $item->getPrimaryKey();
-            }
-
-        }
-
-        return data_find($this->fQCN, $query, $allPrimaryKeys);
+        return data_find($this->fQCN, $query, $this->items);
     }
 
     public function add(string $primaryKey): CollectionInterface
     {
-        $uniqueEntityProxy = UniqueEntityProxy::getInstance($primaryKey, $this->fQCN);
-
-        $this->items[spl_object_id($uniqueEntityProxy)] = $uniqueEntityProxy;
+        $this->items[$primaryKey] = $primaryKey;
 
         return $this;
     }
@@ -53,18 +39,12 @@ class Collection extends AbstractBaseCollection implements CollectionInterface
             ));
         }
 
-        $uniqueEntityProxy = UniqueEntityProxy::getInstance($entity, $this->fQCN);
-
-        $this->items[spl_object_id($uniqueEntityProxy)] = $uniqueEntityProxy;
-
-        return $this;
+        return $this->add($entity->getPrimaryKey());
     }
 
     public function remove(string $primaryKey): CollectionInterface
     {
-        $uniqueEntityProxy = UniqueEntityProxy::getInstance($primaryKey, $this->fQCN);
-
-        unset($this->items[spl_object_id($uniqueEntityProxy)]);
+        unset($this->items[$primaryKey]);
 
         return $this;
     }
@@ -79,24 +59,16 @@ class Collection extends AbstractBaseCollection implements CollectionInterface
             ));
         }
 
-        $uniqueEntityProxy = UniqueEntityProxy::getInstance($entity, $this->fQCN);
-
-        unset($this->items[spl_object_id($uniqueEntityProxy)]);
-
-        return $this;
+        return $this->remove($entity->getPrimaryKey());
     }
 
     public function has(string $primaryKey): bool
     {
-        $uniqueEntityProxy = UniqueEntityProxy::getInstance($primaryKey, $this->fQCN);
-
-        return array_key_exists(spl_object_id($uniqueEntityProxy), $this->items);
+        return array_key_exists($primaryKey, $this->items);
     }
 
     public function hasEntity(EntityInterface $entity): bool
     {
-        $uniqueEntityProxy = UniqueEntityProxy::getInstance($entity, $this->fQCN);
-
-        return array_key_exists(spl_object_id($uniqueEntityProxy), $this->items);
+        return $this->has($entity->getPrimaryKey());
     }
 }

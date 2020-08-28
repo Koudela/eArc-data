@@ -2,16 +2,17 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Filesystem;
+namespace eArc\Data\Filesystem;
 
-use eArc\DataStore\Entity\Interfaces\EntityInterface;
-use eArc\DataStore\Filesystem\Interfaces\DirectoryServiceInterface;
+use eArc\Data\Entity\Interfaces\EntityInterface;
+use eArc\Data\Filesystem\Interfaces\DirectoryServiceInterface;
+use eArc\Data\ParameterInterface;
 use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
 use eArc\Serializer\Exceptions\SerializeException;
 
@@ -32,7 +33,7 @@ abstract class StaticDirectoryService implements DirectoryServiceInterface
 
     public static function getPathFromClassName(string $fQCN, string $mod = ''): string
     {
-        return di_param('earc.data.path').str_replace('\\', '/', $fQCN).$mod.'/';
+        return di_param(ParameterInterface::DATA_PATH).str_replace('\\', '/', $fQCN).$mod.'/';
     }
 
     public static function getPath(EntityInterface $entity, $mod = ''): string

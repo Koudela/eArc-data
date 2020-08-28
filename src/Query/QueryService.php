@@ -2,21 +2,20 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Query;
+namespace eArc\Data\Query;
 
-use eArc\DataStore\Entity\Interfaces\Index\IsIndexedInterface;
-use eArc\DataStore\Exceptions\Interfaces\QueryExceptionInterface;
-use eArc\DataStore\Exceptions\QueryException;
-use eArc\DataStore\Filesystem\StaticDirectoryService;
-use eArc\DataStore\Query\Interfaces\QueryServiceInterface;
+use eArc\Data\Entity\Interfaces\Index\IsIndexedInterface;
+use eArc\Data\Filesystem\StaticDirectoryService;
+use eArc\QueryLanguage\Exception\Interfaces\QueryExceptionInterface;
+use eArc\QueryLanguage\Exception\QueryException;
 
-class QueryService implements QueryServiceInterface
+class QueryService
 {
     /**
      * @param string $fQCN

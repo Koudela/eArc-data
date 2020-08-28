@@ -2,15 +2,15 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Exceptions;
+namespace eArc\Data\Exceptions;
 
-use eArc\DataStore\Exceptions\Interfaces\NoIndexExceptionInterface;
+use eArc\Data\Exceptions\Interfaces\NoIndexExceptionInterface;
 
 /**
  * Is no index exception.

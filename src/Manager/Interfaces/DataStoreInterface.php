@@ -2,17 +2,17 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Manager\Interfaces;
+namespace eArc\Data\Manager\Interfaces;
 
-use eArc\DataStore\Entity\Interfaces\EntityInterface;
-use eArc\DataStore\Exceptions\Interfaces\NoDataExceptionInterface;
-use eArc\DataStore\Repository\Interfaces\RepositoryInterface;
+use eArc\Data\Entity\Interfaces\EntityInterface;
+use eArc\Data\Exceptions\Interfaces\NoDataExceptionInterface;
+use eArc\Data\Repository\Interfaces\RepositoryInterface;
 use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
 
 interface DataStoreInterface

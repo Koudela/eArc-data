@@ -1,4 +1,4 @@
-Feature: earc/data-store
+Feature: earc/data
 
   Background:
     Given data is bootstraped

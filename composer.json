@@ -1,5 +1,5 @@
 {
-    "name": "earc/data-store",
+    "name": "earc/data",
     "description": "eArc - the explicit architecture framework - data component",
     "type": "library",
     "license": "MIT",
@@ -14,17 +14,19 @@
     "prefer-stable" : true,
     "require": {
         "php": "^7.2",
-        "earc/di": "^2.4",
         "ext-json": "*",
-        "earc/serializer": "^0.0"
+        "earc/serializer": "^1.0",
+        "earc/query-language": "^0.0.0",
+        "ext-redis": "*"
     },
     "autoload": {
         "psr-4" : {
-            "eArc\\DataStore\\" : "src/",
-            "eArc\\DataStoreTests\\" : "tests/"
+            "eArc\\Data\\" : "src/",
+            "eArc\\DataTests\\" : "tests/"
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.5"
+        "phpunit/phpunit": "^8.5",
+        "symfony/var-dumper": "^5.2"
     }
 }

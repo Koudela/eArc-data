@@ -2,19 +2,20 @@
 /**
 * e-Arc Framework - the explicit Architecture Framework
 *
-* @package earc/data-store
-* @link https://github.com/Koudela/eArc-data-store/
+* @package earc/data
+* @link https://github.com/Koudela/eArc-data/
 * @copyright Copyright (c) 2019-2020 Thomas Koudela
 * @license http://opensource.org/licenses/MIT MIT License
 */
 
-namespace eArc\DataStore\IndexHandling;
+namespace eArc\Data\IndexHandling;
 
-use eArc\DataStore\Entity\Interfaces\EntityInterface;
-use eArc\DataStore\Entity\Interfaces\Index\IsIndexedInterface;
-use eArc\DataStore\Filesystem\StaticDirectoryService;
+use eArc\Data\Entity\Interfaces\EntityInterface;
+use eArc\Data\Entity\Interfaces\Index\IsIndexedInterface;
+use eArc\Data\Filesystem\StaticDirectoryService;
 use eArc\Serializer\Exceptions\SerializeException;
 use ReflectionClass;
+use ReflectionException;
 
 class IndexEventHandler
 {
@@ -25,7 +26,7 @@ class IndexEventHandler
      *
      * @param EntityInterface $entity
      *
-     * @throws
+     * @throws SerializeException|ReflectionException
      */
     public static function beforeEntitySaved(EntityInterface $entity): void
     {
@@ -111,6 +112,8 @@ class IndexEventHandler
      * This method is called every time an entity is removed.
      *
      * @param EntityInterface $entity
+     *
+     * @throws SerializeException
      */
     public static function afterEntityRemoved(EntityInterface $entity): void
     {

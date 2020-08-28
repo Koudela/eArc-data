@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace eArc\DataStoreTests\env;
+namespace eArc\DataTests\env;
 
-use eArc\DataStore\Entity\AbstractEntity;
-use eArc\DataStore\Entity\Interfaces\Index\IsIndexedInterface;
-use eArc\DataStore\Entity\Interfaces\PrimaryKey\AutoincrementPrimaryKeyInterface;
+use eArc\Data\Entity\AbstractEntity;
+use eArc\Data\Entity\Interfaces\Index\IsIndexedInterface;
+use eArc\Data\Entity\Interfaces\PrimaryKey\AutoincrementPrimaryKeyInterface;
 
 class TestEntityB extends AbstractEntity implements AutoincrementPrimaryKeyInterface, IsIndexedInterface
 {

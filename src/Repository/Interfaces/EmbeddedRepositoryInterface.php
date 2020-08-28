@@ -2,16 +2,16 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Repository\Interfaces;
+namespace eArc\Data\Repository\Interfaces;
 
-use eArc\DataStore\Entity\Interfaces\EmbeddedEntityInterface;
-use eArc\DataStore\Exceptions\Interfaces\QueryExceptionInterface;
+use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
+use eArc\QueryLanguage\Exception\QueryException;
 
 interface EmbeddedRepositoryInterface extends RepositoryBaseInterface
 {
@@ -24,7 +24,7 @@ interface EmbeddedRepositoryInterface extends RepositoryBaseInterface
      *
      * @return EmbeddedEntityInterface[]
      *
-     * @throws QueryExceptionInterface
+     * @throws QueryException
      */
     public function findBy(array $keyValuePairs): array;
 }

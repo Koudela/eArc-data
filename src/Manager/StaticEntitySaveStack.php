@@ -2,18 +2,18 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Manager;
+namespace eArc\Data\Manager;
 
-use eArc\DataStore\Entity\Interfaces\EntityInterface;
-use eArc\DataStore\IndexHandling\IndexEventHandler;
-use eArc\DataStore\IndexHandling\PrimaryKeyGenerator;
-use eArc\DataStore\Manager\Interfaces\EntitySaveStackInterface;
+use eArc\Data\Entity\Interfaces\EntityInterface;
+use eArc\Data\IndexHandling\IndexEventHandler;
+use eArc\Data\IndexHandling\PrimaryKeyGenerator;
+use eArc\Data\Manager\Interfaces\EntitySaveStackInterface;
 use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
 use eArc\Serializer\Exceptions\SerializeException;
 use ReflectionClass;
@@ -21,11 +21,6 @@ use ReflectionException;
 
 abstract class StaticEntitySaveStack implements EntitySaveStackInterface
 {
-    /** @var UniqueEntityProxy[] */
-    protected static $notPersistedEntities = [];
-    /** @var UniqueEntityProxy[][] */
-    protected static $persistedEntities = [];
-
     /** @var EntityInterface[] */
     protected static $entitySaveStack = [];
 
@@ -96,26 +91,6 @@ abstract class StaticEntitySaveStack implements EntitySaveStackInterface
             $primaryKeyProperty = (new ReflectionClass($entity))->getProperty('primaryKey');
             $primaryKeyProperty->setAccessible(true);
             $primaryKeyProperty->setValue($entity, $primaryKey);
-
-            if (null === $oldPrimaryKey) {
-                if (isset(self::$notPersistedEntities[spl_object_id($entity)])) {
-                    $proxy = self::$notPersistedEntities[spl_object_id($entity)];
-                    self::$persistedEntities[get_class($entity)][$primaryKey] = $proxy;
-                    unset(self::$notPersistedEntities[spl_object_id($entity)]);
-                }
-            } else {
-                if (isset(self::$persistedEntities[get_class($entity)][$oldPrimaryKey])) {
-                    $proxy = self::$persistedEntities[get_class($entity)][$oldPrimaryKey];
-                    self::$notPersistedEntities[spl_object_id($entity)] = $proxy;
-                    unset(self::$persistedEntities[get_class($entity)][$oldPrimaryKey]);
-                }
-            }
-
-            if (isset($proxy)) {
-                $reflectionProperty = (new ReflectionClass($proxy))->getProperty('primaryKey');
-                $reflectionProperty->setAccessible(true);
-                $reflectionProperty->setValue($proxy, $entity->getPrimaryKey());
-            }
         } catch (ReflectionException $e) {
             throw new SerializeException($e->getMessage(), $e->getCode(), $e);
         }

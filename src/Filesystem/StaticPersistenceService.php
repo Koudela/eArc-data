@@ -2,19 +2,20 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/data-store
- * @link https://github.com/Koudela/eArc-data-store/
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
  * @copyright Copyright (c) 2019-2020 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataStore\Filesystem;
+namespace eArc\Data\Filesystem;
 
-use eArc\DataStore\Entity\Interfaces\EntityInterface;
-use eArc\DataStore\Exceptions\Interfaces\NoDataExceptionInterface;
-use eArc\DataStore\Exceptions\NoDataException;
-use eArc\DataStore\Filesystem\Interfaces\PersistenceInterface;
-use eArc\DataStore\Manager\StaticEntitySaveStack;
+use eArc\Data\Entity\Interfaces\EntityInterface;
+use eArc\Data\Exceptions\Interfaces\NoDataExceptionInterface;
+use eArc\Data\Exceptions\NoDataException;
+use eArc\Data\Filesystem\Interfaces\PersistenceInterface;
+use eArc\Data\Manager\StaticEntitySaveStack;
+use eArc\Data\Serialization\SerializerType;
 use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
 use eArc\Serializer\Exceptions\SerializeException;
 use eArc\Serializer\Services\FactoryService;
@@ -29,7 +30,7 @@ abstract class StaticPersistenceService implements PersistenceInterface
      */
     public static function persist(EntityInterface $entity): void
     {
-        $array = di_get(SerializeService::class)->getAsArray($entity);
+        $array = di_get(SerializeService::class)->getAsArray($entity, di_get(SerializerType::class));
 
         di_static(StaticEntitySaveStack::class)::beforeEntitySaved($entity);
         di_static(StaticDirectoryService::class)::forceChdir($entity);
@@ -63,7 +64,7 @@ abstract class StaticPersistenceService implements PersistenceInterface
         $rawContent = self::loadRawContent($fQCN, $primaryKey);
 
         $entity = di_get(FactoryService::class)->initObject($fQCN);
-        di_get(FactoryService::class)->attachProperties($entity, $rawContent);
+        di_get(FactoryService::class)->attachProperties($entity, $rawContent, di_get(SerializerType::class));
 
         if (!$entity instanceof $fQCN) {
             throw new SerializeException('Loading does not yield the correct entity class.');

@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace eArc\DataStoreTests\env;
+namespace eArc\DataTests\env;
 
-use eArc\DataStore\Entity\AbstractEntity;
-use eArc\DataStore\Entity\Interfaces\EntityInterface;
-use eArc\DataStore\Manager\UniqueEntityProxy;
-use function eArc\DataStore\Manager\data_load;
+use eArc\Data\Entity\AbstractEntity;
+use eArc\Data\Entity\Interfaces\EntityInterface;
+use eArc\Data\Manager\UniqueEntityProxy;
+use function eArc\Data\Manager\data_load;
 
 class TestEntityA extends AbstractEntity
 {
