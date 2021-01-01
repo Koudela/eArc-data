@@ -4,7 +4,7 @@
  *
  * @package earc/data
  * @link https://github.com/Koudela/eArc-data/
- * @copyright Copyright (c) 2019-2020 Thomas Koudela
+ * @copyright Copyright (c) 2019-2021 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 

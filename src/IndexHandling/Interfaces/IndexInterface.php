@@ -2,13 +2,13 @@
 /**
  * e-Arc Framework - the explicit Architecture Framework
  *
- * @package earc/query-language
- * @link https://github.com/Koudela/eArc-query-language/
- * @copyright Copyright (c) 2020 Thomas Koudela
+ * @package earc/data
+ * @link https://github.com/Koudela/eArc-data/
+ * @copyright Copyright (c) 2019-2021 Thomas Koudela
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\QueryLanguage\IndexHandling\Interfaces;
+namespace eArc\Data\IndexHandling\Interfaces;
 
 interface IndexInterface
 {
