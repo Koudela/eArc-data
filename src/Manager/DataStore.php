@@ -16,11 +16,9 @@ use eArc\Data\Entity\Interfaces\Events\OnPersistInterface;
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Exceptions\Interfaces\NoDataExceptionInterface;
 use eArc\Data\Manager\Interfaces\DataStoreInterface;
-use eArc\Data\Query\QueryService;
-use eArc\Data\Repository\GenericRepository;
-use eArc\Data\Repository\Interfaces\RepositoryInterface;
+use eArc\Data\Query\QueryFactory;
 use eArc\Data\Filesystem\StaticPersistenceService;
-use eArc\QueryLanguage\Exception\Interfaces\QueryExceptionInterface;
+use eArc\QueryLanguage\Collector\QueryInitializerExtended;
 use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
 
 class DataStore implements DataStoreInterface
@@ -40,18 +38,6 @@ class DataStore implements DataStoreInterface
     public function isLoaded(string $fQCN, string $primaryKey): bool
     {
         return isset($this->entities[$fQCN][$primaryKey]);
-    }
-
-    public function getRepository(string $fQCN): RepositoryInterface
-    {
-        /** @var GenericRepository[] */
-        static $repositories = [];
-
-        if (!array_key_exists($fQCN, $repositories)) {
-            $repositories[$fQCN] = new GenericRepository($fQCN);
-        }
-
-        return $repositories[$fQCN];
     }
 
     public function init(): void
@@ -158,16 +144,31 @@ class DataStore implements DataStoreInterface
              * entities of the class are returned.
              *
              * @param string $fQCN
-             * @param string|null $query
+             * @param array $keyValuePairs
              * @param array|null $allowedPrimaryKeys
              *
-             * @return array
-             *
-             * @throws QueryExceptionInterface
+             * @return string[]
              */
-            function data_find(string $fQCN, ?string $query, ?array $allowedPrimaryKeys = null): array
+            function data_find(string $fQCN, array $keyValuePairs = [], ?array $allowedPrimaryKeys = null): iterable
             {
-                return di_get(QueryService::class)->find($fQCN, $query, $allowedPrimaryKeys);
+                return di_get(QueryFactory::class)->findBy($fQCN, $keyValuePairs, $allowedPrimaryKeys);
+            }
+        }
+
+        if (!function_exists('data_query')) {
+            /**
+             * Get the query builder based on the fully qualified class name. If
+             * the query shall be executed on a subset pass the relevant primary
+             * keys as second parameter.
+             *
+             * @param string $fQCN
+             * @param array|null $allowedPrimaryKeys
+             *
+             * @return QueryInitializerExtended
+             */
+            function data_query(string $fQCN, ?array $allowedPrimaryKeys = null): QueryInitializerExtended
+            {
+                return di_get(QueryFactory::class)->select($allowedPrimaryKeys)->from($fQCN);
             }
         }
     }

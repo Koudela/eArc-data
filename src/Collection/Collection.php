@@ -13,8 +13,10 @@ namespace eArc\Data\Collection;
 use eArc\Data\Collection\Interfaces\CollectionInterface;
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Exceptions\HomogeneityException;
+use eArc\QueryLanguage\Collector\QueryInitializerExtended;
 use function eArc\Data\Manager\data_find;
 use function eArc\Data\Manager\data_load;
+use function eArc\Data\Manager\data_query;
 
 class Collection extends AbstractBaseCollection implements CollectionInterface
 {
@@ -29,9 +31,14 @@ class Collection extends AbstractBaseCollection implements CollectionInterface
         return $entities;
     }
 
-    public function find(?string $query = null): array
+    public function findBy(array $keyValuePairs = []): iterable
     {
-        return data_find($this->fQCN, $query, $this->items);
+        return data_find($this->fQCN, $keyValuePairs, $this->items);
+    }
+
+    public function getQueryBuilder(): QueryInitializerExtended
+    {
+        return data_query($this->fQCN, $this->items);
     }
 
     public function add(string $primaryKey): CollectionInterface

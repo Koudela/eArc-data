@@ -10,20 +10,25 @@
 
 namespace eArc\Data\Repository\Interfaces;
 
-use eArc\QueryLanguage\Exception\QueryException;
+use eArc\QueryLanguage\Collector\QueryInitializerExtended;
 
 interface RepositoryInterface extends RepositoryBaseInterface
 {
     /**
-     * Get the primary keys for the query based on the entities in the
-     * repository. If the query is null the primary keys for all entities in the
-     * repository are returned.
+     * Get the primary keys for key value pairs based on the entities in the
+     * repository. If the key value pairs are empty the primary keys for all
+     * entities in the repository are returned.
      *
-     * @param string|null $query
+     * @param string[] $keyValuePairs
      *
      * @return string[]
-     *
-     * @throws QueryException
      */
-    public function find(?string $query = null): array;
+    public function findBy(array $keyValuePairs = []): iterable;
+
+    /**
+     * Get the query builder based on the repository.
+     *
+     * @return QueryInitializerExtended
+     */
+    public function getQueryBuilder(): QueryInitializerExtended;
 }

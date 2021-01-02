@@ -4,6 +4,7 @@ use eArc\Data\Manager\DataStore;
 use eArc\DataTests\env\TestEntityB;
 use eArc\DI\DI;
 use function eArc\Data\Manager\data_delete;
+use function eArc\Data\Manager\data_find;
 use function eArc\Data\Manager\data_load;
 use function eArc\Data\Manager\data_save;
 
@@ -13,9 +14,9 @@ DI::init();
 di_set_param('earc.data.path', __DIR__.'/data/');
 di_get(DataStore::class)->init();
 $TEB = new TestEntityB();
-$TEB->setSomeValue(rand(0,5));
+$TEB->setSomeValue(rand(0,50));
 data_save($TEB);
-foreach(di_get(DataStore::class)->getRepository(TestEntityB::class)->find() as $primaryKey) {
+foreach(data_find(TestEntityB::class) as $primaryKey) {
     //var_dump(data_load(TestEntityA::class, $primaryKey));
     var_dump($primaryKey);
     $entity = data_load(TestEntityB::class, $primaryKey);

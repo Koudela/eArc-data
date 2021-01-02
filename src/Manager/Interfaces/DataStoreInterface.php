@@ -12,7 +12,6 @@ namespace eArc\Data\Manager\Interfaces;
 
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Exceptions\Interfaces\NoDataExceptionInterface;
-use eArc\Data\Repository\Interfaces\RepositoryInterface;
 use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
 
 interface DataStoreInterface
@@ -42,17 +41,8 @@ interface DataStoreInterface
     public function isLoaded(string $fQCN, string $primaryKey): bool;
 
     /**
-     * Get the repository the fully qualified class name relates to.
-     *
-     * @param string $fQCN
-     *
-     * @return RepositoryInterface
-     */
-    public function getRepository(string $fQCN): RepositoryInterface;
-
-    /**
      * Registers the functions `data_load`, `data_save`, `data_delete`,
-     * `data_remove` and `data_find`.
+     * `data_remove`, `data_find` and `data_select`.
      */
     public function init(): void;
 
