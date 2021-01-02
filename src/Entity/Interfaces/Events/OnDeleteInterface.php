@@ -8,14 +8,16 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Entity\Interfaces\Cascade;
+namespace eArc\Data\Entity\Interfaces\Events;
 
-interface CascadePersistInterface
+interface OnDeleteInterface
 {
     /**
-     * Returns an array with the cascaded properties.
+     * Returns an iterable of callbacks. These will be called prior deletion.
      *
-     * @return bool[]
+     * Hint: Use this interface to cascade deletion.
+     *
+     * @return callable[]
      */
-    public static function getCascadeOnPersistProperties(): array;
+    public function getOnDeleteCallables(): array;
 }

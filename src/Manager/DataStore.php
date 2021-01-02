@@ -10,6 +10,9 @@
 
 namespace eArc\Data\Manager;
 
+use eArc\Data\Entity\Interfaces\Events\OnDeleteInterface;
+use eArc\Data\Entity\Interfaces\Events\OnLoadInterface;
+use eArc\Data\Entity\Interfaces\Events\OnPersistInterface;
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Exceptions\Interfaces\NoDataExceptionInterface;
 use eArc\Data\Manager\Interfaces\DataStoreInterface;
@@ -67,7 +70,15 @@ class DataStore implements DataStoreInterface
              */
             function data_load(string $fQCN, string $primaryKey): EntityInterface
             {
-                return di_get(DataStore::class)->load($fQCN, $primaryKey);
+                $entity = di_get(DataStore::class)->load($fQCN, $primaryKey);
+
+                if ($entity instanceof OnLoadInterface) {
+                    foreach ($entity->getOnLoadCallables() as $callable) {
+                        $callable();
+                    }
+                }
+
+                return $entity;
             }
         }
 
@@ -84,6 +95,12 @@ class DataStore implements DataStoreInterface
              */
             function data_save(EntityInterface $entity): EntityInterface
             {
+                if ($entity instanceof OnPersistInterface) {
+                    foreach ($entity->getOnPersistCallables() as $callable) {
+                        $callable();
+                    }
+                }
+
                 di_static(StaticPersistenceService::class)::persist($entity);
 
                 return $entity;
@@ -102,6 +119,12 @@ class DataStore implements DataStoreInterface
              */
             function data_delete(EntityInterface $entity): EntityInterface
             {
+                if ($entity instanceof OnDeleteInterface) {
+                    foreach ($entity->getOnDeleteCallables() as $callable) {
+                        $callable();
+                    }
+                }
+
                 di_static(StaticPersistenceService::class)::remove($entity);
 
                 return $entity;
@@ -116,12 +139,15 @@ class DataStore implements DataStoreInterface
              * @param string $fQCN
              * @param string $primaryKey
              *
+             * @return EntityInterface
+             *
              * @throws NoDataExceptionInterface|SerializeExceptionInterface
              */
-            function data_remove(string $fQCN, string $primaryKey): void
+            function data_remove(string $fQCN, string $primaryKey): EntityInterface
             {
                 $entity = di_get(DataStore::class)->load($fQCN, $primaryKey);
-                di_static(StaticPersistenceService::class)::remove($entity);
+
+                return data_delete($entity);
             }
         }
 

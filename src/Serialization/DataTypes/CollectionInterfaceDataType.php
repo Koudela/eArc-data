@@ -13,7 +13,7 @@ namespace eArc\Data\Serialization\DataTypes;
 use eArc\Data\Collection\Collection;
 use eArc\Data\Collection\Interfaces\CollectionInterface;
 use eArc\Data\Entity\Interfaces\EntityBaseInterface;
-use eArc\Data\Entity\Interfaces\Cascade\CascadePersistInterface;
+use eArc\Data\Entity\Interfaces\Events\OnPersistInterface;
 use eArc\Data\Manager\DataStore;
 use eArc\Data\Manager\StaticEntitySaveStack;
 use eArc\Serializer\DataTypes\Interfaces\DataTypeInterface;
@@ -36,16 +36,6 @@ class CollectionInterfaceDataType implements DataTypeInterface
             /** @var CollectionInterface $propertyValue */
             $collectionReflection = new ReflectionClass($propertyValue);
             $items = $collectionReflection->getProperty('items')->getValue($propertyValue);
-
-            if ($object instanceof CascadePersistInterface) {
-                if (array_key_exists($propertyName, $object::getCascadeOnPersistProperties())) {
-                    foreach ($items as $primaryKey) {
-                        if (di_get(DataStore::class)->isLoaded($propertyValue->getEntityName(), $primaryKey)) {
-                            di_static(StaticEntitySaveStack::class)::addToStack(data_load($propertyValue->getEntityName(), $primaryKey));
-                        }
-                    }
-                }
-            }
 
             if ($propertyValue instanceof CollectionInterface) {
                 $entityArray[$propertyName] = [

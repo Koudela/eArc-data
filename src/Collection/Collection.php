@@ -14,9 +14,21 @@ use eArc\Data\Collection\Interfaces\CollectionInterface;
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Exceptions\HomogeneityException;
 use function eArc\Data\Manager\data_find;
+use function eArc\Data\Manager\data_load;
 
 class Collection extends AbstractBaseCollection implements CollectionInterface
 {
+    public function asArray(): array
+    {
+        $entities = [];
+
+        foreach ($this->items as $primaryKey) {
+            $entities[$primaryKey] = data_load($this->fQCN, $primaryKey);
+        }
+
+        return $entities;
+    }
+
     public function find(?string $query = null): array
     {
         return data_find($this->fQCN, $query, $this->items);
