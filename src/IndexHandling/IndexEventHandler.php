@@ -12,7 +12,7 @@ namespace eArc\Data\IndexHandling;
 
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Entity\Interfaces\Index\IsIndexedInterface;
-use eArc\Data\Filesystem\StaticDirectoryService;
+use eArc\Data\IndexHandling\Interfaces\IndexInterface;
 use eArc\Serializer\Exceptions\SerializeException;
 use ReflectionClass;
 use ReflectionException;
@@ -36,75 +36,8 @@ class IndexEventHandler
                 $property = $reflectionEntity->getProperty($propertyName);
                 $property->setAccessible(true);
                 $value = (string) $property->getValue($entity);
-                self::updateIndex($type, $entity, $propertyName, $value);
+                di_get(IndexInterface::class)::updateIndex($type, $entity, $propertyName, $value);
             }
-        }
-    }
-
-    protected static function updateIndex(string $type, EntityInterface $entity, string $propertyName, $value)
-    {
-        di_static(StaticDirectoryService::class)::forceChdir($entity, '@'.$type);
-        $filename = $propertyName.'.txt';
-
-        if (!$handle = fopen($filename, 'c^+')) {
-            throw new SerializeException(sprintf(
-                'Cannot open file %s.',
-                getcwd().'/'.$filename
-            ));
-        }
-
-        if (!flock($handle, LOCK_EX)) {
-            throw new SerializeException(sprintf(
-                'Cannot acquire lock for %s.',
-                getcwd().'/'.$filename
-            ));
-        }
-
-        self::updateIndexCSV($handle,$type === IsIndexedInterface::TYPE_UNIQUE, $propertyName, $entity->getPrimaryKey(), $value);
-
-        flock($handle, LOCK_UN);
-        fclose($handle);
-    }
-
-    protected static function updateIndexCSV($handle, bool $unique, string $propertyName, string $primaryKey, ?string $value)
-    {
-        $index = [];
-
-        while ($array = fgetcsv($handle)) {
-            foreach (array_keys($array, $primaryKey, true) as $key) {
-                if ($key !== 0) {
-                    unset($array[$key]);
-                }
-            }
-
-            if ($array[0] === $value) {
-                $array[] = $primaryKey;
-            }
-
-            if (count($array) > 1) {
-                $index[$array[0]] = $array;
-            }
-
-            if ($unique && count($array) > 2) {
-                throw new SerializeException(sprintf(
-                    'Unique index %s for value %s is violated by primary key %s (old) and %s (new)',
-                    $propertyName,
-                    $value,
-                    $array[1],
-                    $primaryKey
-                ));
-            }
-        }
-
-        if (null !== $value && !array_key_exists($value, $index)) {
-            $index[$value] = [$value, $primaryKey];
-        }
-
-        ftruncate($handle, 0);
-        rewind($handle);
-
-        foreach ($index as $line) {
-            fputcsv($handle, $line);
         }
     }
 
@@ -119,7 +52,7 @@ class IndexEventHandler
     {
         if ($entity instanceof IsIndexedInterface) {
             foreach ($entity::getIndexedProperties() as $propertyName => $type) {
-                self::updateIndex($type, $entity, $propertyName, null);
+                di_get(IndexInterface::class)->updateIndex($type, $entity, $propertyName, null);
             }
         }
     }

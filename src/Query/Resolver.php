@@ -11,6 +11,8 @@
 namespace eArc\Data\Query;
 
 use eArc\Data\Filesystem\StaticDirectoryService;
+use eArc\Data\IndexHandling\Interfaces\IndexInterface;
+use eArc\Data\IndexHandling\UseRedis\Helper\QueryRange;
 use eArc\QueryLanguage\AbstractResolver;
 
 class Resolver extends AbstractResolver
@@ -21,17 +23,23 @@ class Resolver extends AbstractResolver
             case 'IN':
             case 'NOT IN':
             case '=':
+                return di_get(IndexInterface::class)->queryIndex($dataCategory, $dataProperty, $value);
             case '!=':
+                return array_diff_key($this->findAll($dataCategory), di_get(IndexInterface::class)->queryIndex($dataCategory, $dataProperty, $value));
             case '<':
+                new QueryRange($dataCategory, $dataProperty, null, $value, false, false);
             case '<=':
+                new QueryRange($dataCategory, $dataProperty, null, $value, false, true);
             case '>':
+                new QueryRange($dataCategory, $dataProperty, $value, null, false);
             case '>=':
+                new QueryRange($dataCategory, $dataProperty, $value, null, true);
         }
 
         // TODO: ...
     }
 
-    public function findAll(string $dataCategory): iterable
+    public function findAll(string $dataCategory): array
     {
         $all = [];
 

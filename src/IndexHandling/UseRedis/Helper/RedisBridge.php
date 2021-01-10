@@ -8,39 +8,16 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\IndexHandling\Interfaces;
+namespace eArc\Data\IndexHandling\UseRedis\Helper;
 
-use eArc\Data\IndexHandling\QualifiedValue;
-use eArc\Data\IndexHandling\QueryRange;
-use eArc\Data\IndexHandling\QueryValue;
 use Redis;
-
-interface IndexInterface
-{
-    public function addToIndex(QualifiedValue $value): bool;
-    public function removeFromIndex(QualifiedValue $value): bool;
-    public function queryIndex(QueryValue $value): array;
-    public function cardinalityIndex(QueryValue $val): int;
-
-    public function addToSortedIndex(QualifiedValue $value): bool;
-    public function removeFromSortedIndex(QualifiedValue $value): bool;
-
-    public function queryIndexRange(QueryRange $range): array;
-    public function queryIndexRangeReversed(QueryRange $range): array;
-
-    public function querySortedIndexRange(QueryRange $range): array;
-    public function querySortedIndexRangeReversed(QueryRange $range): array;
-
-    public function queryLexIndexRange(QueryRange $range): array;
-    public function queryLexIndexRangeReversed(QueryRange $range): array;
-}
 
 /**
  * index/unique
  *
  * sort/limit
  */
-class IndexFactory implements IndexInterface
+class RedisBridge implements RedisBridgeInterface
 {
     /** @var Redis */
     protected $redis;
@@ -50,14 +27,14 @@ class IndexFactory implements IndexInterface
         $this->redis = new Redis();
     }
 
-    public function addToIndex(QualifiedValue $val): bool
+    public function addToIndex(QualifiedValue $value): bool
     {
-        return (bool) $this->redis->sAdd($val->longKey(), $val->dataId());
+        return (bool) $this->redis->sAdd($value->newLongKey(), $value->dataId());
     }
 
-    public function removeFromIndex(QualifiedValue $val): bool
+    public function removeFromIndex(QualifiedValue $value): bool
     {
-        return (bool) $this->redis->sRem($val->longKey(), $val->dataId());
+        return (bool) $this->redis->sRem($value->longKey(), $value->dataId());
     }
 
     public function queryIndex(QueryValue $val): array
@@ -70,22 +47,22 @@ class IndexFactory implements IndexInterface
         return $this->redis->sCard($val->longKey());
     }
 
-    public function addToSortedIndex(QualifiedValue $val): bool
+    public function addToSortedIndex(QualifiedValue $value): bool
     {
-        $this->redis->zAdd($val->shortKey(), $val->getSort(), $val->value());
+        $this->redis->zAdd($value->shortKey(), $value->newValue(), $value->dataId());
 
-        return $this->addToIndex($val);
+        return $this->addToIndex($value);
     }
 
-    public function removeFromSortedIndex(QualifiedValue $val): bool
+    public function removeFromSortedIndex(QualifiedValue $value): bool
     {
-        $isSuccess = $this->removeFromIndex($val);
+        $isSuccess = $this->removeFromIndex($value);
 
-        if (0 !== $this->cardinalityIndex($val)) {
+        if (0 !== $this->cardinalityIndex($value)) {
             return $isSuccess;
         }
 
-        return (bool) $this->redis->zRem($val->shortKey(), $val->value()) && $isSuccess;
+        return (bool) $this->redis->zRem($value->shortKey(), $value->dataId()) && $isSuccess;
     }
 
     public function queryIndexRange(QueryRange $range): array
@@ -139,7 +116,7 @@ class IndexFactory implements IndexInterface
         return $this->queryIndexRangeRaw($range, $args);
     }
 
-    protected function querySortedIndexRaw(QueryRange $range, string $command)
+    protected function querySortedIndexRaw(QueryRange $range, string $command): array
     {
         $min = is_null($range->min()) ? '-inf' : ($range->minIsIncluded() ? '' : '(') . $range->min();
         $max = is_null($range->max()) ? '+inf' : ($range->maxIsIncluded() ? '' : '(') . $range->max();

@@ -8,7 +8,7 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\IndexHandling;
+namespace eArc\Data\IndexHandling\UseRedis\Helper;
 
 class QueryValue extends AbstractValue
 {
@@ -32,25 +32,13 @@ class QueryValue extends AbstractValue
         return $longKey;
     }
 
-    public function value(): string
+    public function value()
     {
-        static $stringValue;
-
-        if (!isset($stringValue)) {
-            $stringValue = (string) $this->value;
-        }
-
-        return $stringValue;
+        return $this->value;
     }
 
-    public function getSort(): int
+    public function getSingleRange(): QueryRange
     {
-        static $sort;
-
-        if (!isset($sort)) {
-            $sort = 0;
-        }
-
-        return $sort;
+        return new QueryRange($this->dataCategory, $this->dataProperty, $this->value);
     }
 }
