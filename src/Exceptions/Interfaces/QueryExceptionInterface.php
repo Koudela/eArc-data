@@ -10,6 +10,10 @@
 
 namespace eArc\Data\Exceptions\Interfaces;
 
-interface UniqueIndexViolationExceptionInterface extends DataExceptionInterface
+/**
+ * Is thrown if the findBy method of the embedded collection also known as embedded
+ * repository detects unexpected issues.
+ */
+interface QueryExceptionInterface extends DataExceptionInterface
 {
 }

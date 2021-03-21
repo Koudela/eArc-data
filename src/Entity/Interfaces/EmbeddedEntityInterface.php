@@ -12,10 +12,15 @@ namespace eArc\Data\Entity\Interfaces;
 
 interface EmbeddedEntityInterface extends EntityBaseInterface
 {
+    /**
+     * @return EntityInterface The entity that is reverenced in the database by
+     * a primary key and embeds the embedded entity in its property tree.
+     */
     public function getRootEntity(): EntityInterface;
 
     /**
-     * @return EmbeddedEntityInterface|EntityInterface
+     * @return EntityInterface|EmbeddedEntityInterface The entity that has this
+     * embedded entity as one of its properties.
      */
-    public function getOwnerEntity(): EntityBaseInterface;
+    public function getOwnerEntity(): EntityInterface|EmbeddedEntityInterface;
 }

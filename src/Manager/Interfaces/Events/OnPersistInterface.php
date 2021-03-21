@@ -8,14 +8,17 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Entity\Interfaces\Events;
+namespace eArc\Data\Manager\Interfaces\Events;
 
 interface OnPersistInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called prior persistence.
+     * Returns an iterable of callbacks. These will be called in order to save the
+     * data of the entity.
      *
-     * Hint: Use this interface to cascade persistence.
+     * All callables of all tagged Services are called. Thus there can be services
+     * persisting to database(s), services persisting to search indices and services
+     * caching the entity by shared memory, redis server or other means.
      *
      * @return callable[]
      */

@@ -8,8 +8,15 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Exceptions\Interfaces;
+namespace eArc\Data\Entity\Interfaces\Events;
 
-interface NoIndexExceptionInterface extends DataExceptionInterface
+interface PrePersistInterface
 {
+    /**
+     * Returns an iterable of callbacks. These will be called before persisting
+     * the entity.
+     *
+     * @return callable[]
+     */
+    public function getPrePersistCallables(): iterable;
 }

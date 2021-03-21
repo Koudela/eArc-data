@@ -10,6 +10,9 @@
 
 namespace eArc\Data\Entity\Interfaces;
 
+/**
+ * Identifies an object as an entity.
+ */
 interface EntityBaseInterface
 {
 }

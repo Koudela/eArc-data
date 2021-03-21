@@ -10,11 +10,8 @@
 
 namespace eArc\Data\Exceptions;
 
-use eArc\Data\Exceptions\Interfaces\NoIndexExceptionInterface;
+use eArc\Data\Exceptions\Interfaces\DataExceptionInterface;
 
-/**
- * Is no index exception.
- */
-class NoIndexException extends DataException implements NoIndexExceptionInterface
+class QueryException extends DataException implements DataExceptionInterface
 {
 }

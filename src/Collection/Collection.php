@@ -13,10 +13,6 @@ namespace eArc\Data\Collection;
 use eArc\Data\Collection\Interfaces\CollectionInterface;
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Exceptions\HomogeneityException;
-use eArc\QueryLanguage\Collector\QueryInitializerExtended;
-use function eArc\Data\Manager\data_find;
-use function eArc\Data\Manager\data_load;
-use function eArc\Data\Manager\data_query;
 
 class Collection extends AbstractBaseCollection implements CollectionInterface
 {
@@ -31,16 +27,6 @@ class Collection extends AbstractBaseCollection implements CollectionInterface
         return $entities;
     }
 
-    public function findBy(array $keyValuePairs = []): iterable
-    {
-        return data_find($this->fQCN, $keyValuePairs, $this->items);
-    }
-
-    public function getQueryBuilder(): QueryInitializerExtended
-    {
-        return data_query($this->fQCN, $this->items);
-    }
-
     public function add(string $primaryKey): CollectionInterface
     {
         $this->items[$primaryKey] = $primaryKey;
@@ -52,7 +38,7 @@ class Collection extends AbstractBaseCollection implements CollectionInterface
     {
         if ($this->fQCN !== get_class($entity)) {
             throw new HomogeneityException(sprintf(
-                'Entity of class %s cannot be added to a collection of type %s.',
+                '{64cf0af1-b856-4bb7-8eb0-bb516cee12c6} Entity of class %s cannot be added to a collection of type %s.',
                 get_class($entity),
                 $this->fQCN
             ));
@@ -72,7 +58,7 @@ class Collection extends AbstractBaseCollection implements CollectionInterface
     {
         if ($this->fQCN !== get_class($entity)) {
             throw new HomogeneityException(sprintf(
-                'Entity of class %s cannot be removed from a collection of type %s.',
+                '{4fae51e4-aefd-4f54-a120-58db244f8138} Entity of class %s cannot be removed from a collection of type %s.',
                 get_class($entity),
                 $this->fQCN
             ));
@@ -89,5 +75,10 @@ class Collection extends AbstractBaseCollection implements CollectionInterface
     public function hasEntity(EntityInterface $entity): bool
     {
         return $this->has($entity->getPrimaryKey());
+    }
+
+    public function getPrimaryKeys(): array
+    {
+        return array_keys($this->items);
     }
 }

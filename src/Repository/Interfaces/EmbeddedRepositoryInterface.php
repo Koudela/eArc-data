@@ -11,7 +11,7 @@
 namespace eArc\Data\Repository\Interfaces;
 
 use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
-use eArc\QueryLanguage\Exception\QueryException;
+use eArc\Data\Exceptions\Interfaces\QueryExceptionInterface;
 
 interface EmbeddedRepositoryInterface extends RepositoryBaseInterface
 {
@@ -24,7 +24,7 @@ interface EmbeddedRepositoryInterface extends RepositoryBaseInterface
      *
      * @return EmbeddedEntityInterface[]
      *
-     * @throws QueryException
+     * @throws QueryExceptionInterface
      */
     public function findBy(array $keyValuePairs): array;
 }

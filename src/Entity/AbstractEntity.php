@@ -14,8 +14,7 @@ use eArc\Data\Entity\Interfaces\EntityInterface;
 
 abstract class AbstractEntity implements EntityInterface
 {
-    /** @var string|null */
-    protected $primaryKey;
+    protected ?string $primaryKey;
 
     public function getPrimaryKey(): ?string
     {

@@ -10,15 +10,15 @@
 
 namespace eArc\Data\Entity\Interfaces\Events;
 
-interface OnLoadInterface
+interface PreLoadInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called post load.
+     * Returns an iterable of callbacks. These will be called before loading the
+     * entity data.
      *
-     * Hint: Use this interface emulate the constructor as earc/data creates
-     * entities from data without calling the constructor.
+     * Hint: This method is static as the entity is not loaded yet.
      *
      * @return callable[]
      */
-    public function getOnLoadCallables(): iterable;
+    public static function getPreLoadCallables(): iterable;
 }

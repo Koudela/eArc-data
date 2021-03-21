@@ -12,6 +12,9 @@ namespace eArc\Data\Entity\Interfaces;
 
 use eArc\Data\Entity\Interfaces\PrimaryKey\PrimaryKeyInterface;
 
+/**
+ * Identifies an object as persistable entity.
+ */
 interface EntityInterface extends EntityBaseInterface, PrimaryKeyInterface
 {
 }

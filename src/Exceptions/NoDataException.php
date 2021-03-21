@@ -12,9 +12,6 @@ namespace eArc\Data\Exceptions;
 
 use eArc\Data\Exceptions\Interfaces\NoDataExceptionInterface;
 
-/**
- * No data exists exception.
- */
 class NoDataException extends DataException implements NoDataExceptionInterface
 {
 }

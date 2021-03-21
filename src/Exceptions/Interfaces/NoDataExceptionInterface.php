@@ -10,6 +10,9 @@
 
 namespace eArc\Data\Exceptions\Interfaces;
 
+/**
+ * Is thrown if no data could be loaded.
+ */
 interface NoDataExceptionInterface extends DataExceptionInterface
 {
 }

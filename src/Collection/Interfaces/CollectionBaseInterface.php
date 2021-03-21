@@ -15,7 +15,15 @@ use IteratorAggregate;
 
 interface CollectionBaseInterface extends IteratorAggregate
 {
+    /**
+     * @return EntityBaseInterface The entity the collection is a property of.
+     */
     public function getOwner(): EntityBaseInterface;
 
+    /**
+     * Hint: Consider using the iterator instead.
+     *
+     * @return EntityBaseInterface[] The items of the collection as array.
+     */
     public function asArray(): array;
 }

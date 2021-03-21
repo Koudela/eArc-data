@@ -17,6 +17,9 @@ use eArc\Data\Repository\Interfaces\EmbeddedRepositoryInterface;
 interface EmbeddedCollectionInterface extends EmbeddedRepositoryInterface, CollectionBaseInterface
 {
     /**
+     * Adds an embedded entity to the members of the collection. If the embedded
+     * entity is already a member this method fails silently.
+     *
      * @param EmbeddedEntityInterface $embeddedEntity
      *
      * @return $this
@@ -26,6 +29,9 @@ interface EmbeddedCollectionInterface extends EmbeddedRepositoryInterface, Colle
     public function add(EmbeddedEntityInterface $embeddedEntity): self;
 
     /**
+     * Removes an embedded entity from the members of the collection. If the embedded
+     * entity is not a member of the collection, this method fails silently.
+     *
      * @param EmbeddedEntityInterface $embeddedEntity
      *
      * @return $this
@@ -35,6 +41,8 @@ interface EmbeddedCollectionInterface extends EmbeddedRepositoryInterface, Colle
     public function remove(EmbeddedEntityInterface $embeddedEntity): self;
 
     /**
+     * Checks whether an embedded entity is member of the collection.
+     *
      * @param EmbeddedEntityInterface $embeddedEntity
      *
      * @return bool

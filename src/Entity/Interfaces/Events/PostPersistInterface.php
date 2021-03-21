@@ -10,14 +10,15 @@
 
 namespace eArc\Data\Entity\Interfaces\Events;
 
-interface OnDeleteInterface
+interface PostPersistInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called prior deletion.
+     * Returns an iterable of callbacks. These will be called after persisting
+     * the entity.
      *
-     * Hint: Use this interface to cascade deletion.
+     * Hint: Use this interface to cascade persistence.
      *
      * @return callable[]
      */
-    public function getOnDeleteCallables(): array;
+    public function getPostPersistCallables(): iterable;
 }

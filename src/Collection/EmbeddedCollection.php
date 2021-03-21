@@ -13,7 +13,7 @@ namespace eArc\Data\Collection;
 use eArc\Data\Collection\Interfaces\EmbeddedCollectionInterface;
 use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
 use eArc\Data\Exceptions\HomogeneityException;
-use eArc\QueryLanguage\Exception\QueryException;
+use eArc\Data\Exceptions\QueryException;
 use ReflectionClass;
 use ReflectionException;
 
@@ -24,7 +24,7 @@ class EmbeddedCollection extends AbstractBaseCollection implements EmbeddedColle
         try {
             $reflectionProperties = (new ReflectionClass($this->getEntityName()))->getProperties();
         } catch (ReflectionException $e) {
-            throw new QueryException($e->getMessage(), $e->getCode(), $e);
+            throw new QueryException('{ab89a36b-b06e-4946-91af-409115b837dc} '.$e->getMessage(), $e->getCode(), $e);
         }
         $indexedProperties = [];
 
@@ -37,7 +37,7 @@ class EmbeddedCollection extends AbstractBaseCollection implements EmbeddedColle
 
         foreach ($keyValuePairs as $key => $value) {
             if (!array_key_exists($key, $indexedProperties)) {
-                throw new QueryException(sprintf('%s is not a property of %s.', $key, $this->fQCN));
+                throw new QueryException(sprintf('{56c6e168-8dd4-46b6-b3ee-096155473f50} %s is not a property of %s.', $key, $this->fQCN));
             }
             foreach ($items as $itemKey => $item) {
                 if ($indexedProperties[$key]->getValue($item) !== $value) {
@@ -53,7 +53,7 @@ class EmbeddedCollection extends AbstractBaseCollection implements EmbeddedColle
     {
         if ($this->fQCN !== get_class($embeddedEntity)) {
             throw new HomogeneityException(sprintf(
-                'Embedded entity of type %s cannot be added to a embedded collection of type %s.',
+                '{4ba1156d-a0aa-48fa-906b-4a30d5d003a3} Embedded entity of type %s cannot be added to a embedded collection of type %s.',
                 get_class($embeddedEntity),
                 $this->fQCN
             ));
@@ -68,7 +68,7 @@ class EmbeddedCollection extends AbstractBaseCollection implements EmbeddedColle
     {
         if ($this->fQCN !== get_class($embeddedEntity)) {
             throw new HomogeneityException(sprintf(
-                'Embedded entity of type %s cannot be removed from a embedded collection of type %s.',
+                '{1b761414-78c1-48e3-be5f-107b45b5bc86} Embedded entity of type %s cannot be removed from a embedded collection of type %s.',
                 get_class($embeddedEntity),
                 $this->fQCN
             ));

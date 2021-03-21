@@ -11,13 +11,11 @@
 namespace eArc\Data\Entity;
 
 use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
-use eArc\Data\Entity\Interfaces\EntityBaseInterface;
 use eArc\Data\Entity\Interfaces\EntityInterface;
 
 abstract class AbstractEmbeddedEntity implements EmbeddedEntityInterface
 {
-    /** @var EntityBaseInterface */
-    protected $ownerEntity;
+    protected EntityInterface|EmbeddedEntityInterface $ownerEntity;
 
     public function getRootEntity(): EntityInterface
     {
@@ -30,7 +28,7 @@ abstract class AbstractEmbeddedEntity implements EmbeddedEntityInterface
         return $entity;
     }
 
-    public function getOwnerEntity(): EntityBaseInterface
+    public function getOwnerEntity(): EntityInterface|EmbeddedEntityInterface
     {
         return $this->ownerEntity;
     }

@@ -13,15 +13,9 @@ namespace eArc\Data\Serialization\DataTypes;
 use eArc\Data\Collection\Collection;
 use eArc\Data\Collection\Interfaces\CollectionInterface;
 use eArc\Data\Entity\Interfaces\EntityBaseInterface;
-use eArc\Data\Entity\Interfaces\Events\OnPersistInterface;
-use eArc\Data\Manager\DataStore;
-use eArc\Data\Manager\StaticEntitySaveStack;
 use eArc\Serializer\DataTypes\Interfaces\DataTypeInterface;
 use eArc\Serializer\Exceptions\SerializeException;
 use eArc\Serializer\SerializerTypes\Interfaces\SerializerTypeInterface;
-use ReflectionClass;
-use ReflectionException;
-use function eArc\Data\Manager\data_load;
 
 class CollectionInterfaceDataType implements DataTypeInterface
 {
@@ -30,23 +24,19 @@ class CollectionInterfaceDataType implements DataTypeInterface
         return $propertyValue instanceof CollectionInterface;
     }
 
-    public function serialize(?object $object, $propertyName, $propertyValue, SerializerTypeInterface $serializerType)
+    public function serialize(?object $object, $propertyName, $propertyValue, SerializerTypeInterface $serializerType): array
     {
-        try {
-            /** @var CollectionInterface $propertyValue */
-            $collectionReflection = new ReflectionClass($propertyValue);
-            $items = $collectionReflection->getProperty('items')->getValue($propertyValue);
-
-            if ($propertyValue instanceof CollectionInterface) {
-                $entityArray[$propertyName] = [
-                    'interface' => CollectionInterface::class,
-                    'fQCN' => $propertyValue->getEntityName(),
-                    'primaryKeys' => $items,
-                ];
-            }
-        } catch (ReflectionException $e) {
-            throw new SerializeException($e->getMessage(), $e->getCode(), $e);
+        if (!$propertyValue instanceof CollectionInterface) {
+            throw new SerializeException(sprintf(
+                '{08d03369-65c4-4628-b87e-93d713519c61} Responsibility failure. Property value has to be an instance of %s.', CollectionInterface::class
+            ));
         }
+
+        return [$propertyName => [
+            'interface' => CollectionInterface::class,
+            'fQCN' => $propertyValue->getEntityName(),
+            'primaryKeys' => $propertyValue->getPrimaryKeys(),
+        ]];
     }
 
     public function isResponsibleForDeserialization(?object $object, string $type, $value): bool

@@ -1,5 +1,7 @@
 <?php declare(strict_types=1);
 
+use eArc\Data\IndexHandling\Interfaces\IndexInterface;
+use eArc\Data\IndexHandling\UseRedis\IndexRedis;
 use eArc\Data\Manager\DataStore;
 use eArc\DataTests\env\TestEntityB;
 use eArc\DI\DI;
@@ -11,6 +13,7 @@ use function eArc\Data\Manager\data_save;
 include __DIR__.'/../vendor/autoload.php';
 
 DI::init();
+di_decorate(IndexInterface::class, IndexRedis::class);
 di_set_param('earc.data.path', __DIR__.'/data/');
 di_get(DataStore::class)->init();
 $TEB = new TestEntityB();

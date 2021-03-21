@@ -14,7 +14,6 @@ use eArc\Data\Serialization\DataTypes\CollectionInterfaceDataType;
 use eArc\Data\Serialization\DataTypes\EmbeddedCollectionInterfaceDataType;
 use eArc\Data\Serialization\DataTypes\EmbeddedEntityInterfaceDataType;
 use eArc\Data\Serialization\DataTypes\EntityInterfaceDataType;
-use eArc\Data\Serialization\DataTypes\PrimaryKeyDataType;
 use eArc\Serializer\DataTypes\ArrayDataType;
 use eArc\Serializer\DataTypes\ClassDataType;
 use eArc\Serializer\DataTypes\DateTimeDataType;
@@ -30,14 +29,12 @@ class SerializerType implements SerializerTypeInterface
         yield EmbeddedCollectionInterfaceDataType::class => null;
         yield EmbeddedEntityInterfaceDataType::class => null;
         yield EntityInterfaceDataType::class => null;
-        yield PrimaryKeyDataType::class => null;
 
         yield DateTimeDataType::class => null;
         yield SimpleDataType::class => null;
         yield ArrayDataType::class => null;
         yield ClassDataType::class => null;
         yield ObjectDataType::class => null;
-
     }
 
     public function filterProperty(string $fQCN, string $propertyName): bool

@@ -29,27 +29,26 @@ class EmbeddedCollectionInterfaceDataType implements DataTypeInterface
         return $propertyValue instanceof EmbeddedCollectionInterface;
     }
 
-    public function serialize(?object $entity, $propertyName, $propertyValue, SerializerTypeInterface $serializerType)
+    public function serialize(?object $object, $propertyName, $propertyValue, SerializerTypeInterface $serializerType): array
     {
-        try {
-            /** @var EmbeddedCollectionInterface $propertyValue */
-            $collectionReflection = new ReflectionClass($propertyValue);
-            $embeddedEntitiesValue = $collectionReflection->getProperty('items')->getValue($propertyValue);
-            $embeddedEntities = [];
-            foreach ($embeddedEntitiesValue as $embeddedEntity) {
-                $embeddedEntities[] = di_get(SerializeService::class)->getAsArray($embeddedEntity, $serializerType);
-            }
-
-            return [
-                'type' => get_class($propertyValue),
-                'value' => [
-                    'fQCN' => $collectionReflection->getProperty('fQCN')->getValue($propertyValue),
-                    'embeddedEntities' => $embeddedEntities,
-                ]
-            ];
-        } catch (ReflectionException $e) {
-            throw new SerializeException($e->getMessage(), $e->getCode(), $e);
+        if (!$propertyValue instanceof EmbeddedCollectionInterface) {
+            throw new SerializeException(sprintf(
+                '{98f03a83-e885-4ed8-a941-0ba63fe29f5e} Responsibility failure. Property value has to be an instance of %s.', EmbeddedCollectionInterface::class
+            ));
         }
+
+        $embeddedEntities = [];
+        foreach ($propertyValue->asArray() as $embeddedEntity) {
+            $embeddedEntities[] = di_get(SerializeService::class)->getAsArray($embeddedEntity, $serializerType);
+        }
+
+        return [
+            'type' => get_class($propertyValue),
+            'value' => [
+                'fQCN' => $propertyValue->getEntityName(),
+                'embeddedEntities' => $embeddedEntities,
+            ]
+        ];
     }
 
     public function isResponsibleForDeserialization(?object $object, string $type, $value): bool
@@ -57,7 +56,7 @@ class EmbeddedCollectionInterfaceDataType implements DataTypeInterface
         return is_subclass_of($type, EmbeddedCollectionInterface::class, true);
     }
 
-    public function deserialize(?object $object, string $type, $value, SerializerTypeInterface $serializerType)
+    public function deserialize(?object $object, string $type, $value, SerializerTypeInterface $serializerType): EmbeddedCollection
     {
         /** @var EntityBaseInterface $object */
         $embeddedCollection = new EmbeddedCollection($object, $value['fQCN']);

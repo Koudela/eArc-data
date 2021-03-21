@@ -10,8 +10,9 @@
 
 namespace eArc\Data\Exceptions\Interfaces;
 
-use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
-
-interface HomogeneityExceptionInterface extends DataExceptionInterface, SerializeExceptionInterface
+/**
+ * Is thrown if a entity is used with a collection of another type.
+ */
+interface HomogeneityExceptionInterface extends DataExceptionInterface
 {
 }

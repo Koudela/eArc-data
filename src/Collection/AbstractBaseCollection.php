@@ -17,17 +17,10 @@ use Generator;
 
 abstract class AbstractBaseCollection implements CollectionBaseInterface, RepositoryBaseInterface
 {
-    /** @var EntityBaseInterface */
-    protected $owner;
-    /** @var string */
-    protected $fQCN;
-    /** @var array */
-    protected $items;
+    protected EntityBaseInterface $owner;
+    protected string $fQCN;
+    protected array $items = [];
 
-    /**
-     * @param EntityBaseInterface $owner
-     * @param string $fQCN
-     */
     public function __construct(EntityBaseInterface $owner, string $fQCN)
     {
         $this->owner = $owner;
