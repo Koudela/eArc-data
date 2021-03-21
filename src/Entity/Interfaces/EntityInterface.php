@@ -8,14 +8,13 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Exceptions;
+namespace eArc\Data\Entity\Interfaces;
 
-use eArc\Data\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
+use eArc\Data\Entity\Interfaces\PrimaryKey\PrimaryKeyInterface;
 
 /**
- * Generic data exception.
+ * Identifies an object as persistable entity.
  */
-class DataException extends RuntimeException implements DataExceptionInterface
+interface EntityInterface extends EntityBaseInterface, PrimaryKeyInterface
 {
 }

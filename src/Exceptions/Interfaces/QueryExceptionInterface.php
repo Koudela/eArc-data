@@ -8,14 +8,12 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Exceptions;
-
-use eArc\Data\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
+namespace eArc\Data\Exceptions\Interfaces;
 
 /**
- * Generic data exception.
+ * Is thrown if the findBy method of the embedded collection also known as embedded
+ * repository detects unexpected issues.
  */
-class DataException extends RuntimeException implements DataExceptionInterface
+interface QueryExceptionInterface extends DataExceptionInterface
 {
 }

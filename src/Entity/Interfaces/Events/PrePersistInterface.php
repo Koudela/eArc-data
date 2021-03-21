@@ -8,14 +8,15 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Exceptions;
+namespace eArc\Data\Entity\Interfaces\Events;
 
-use eArc\Data\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
-
-/**
- * Generic data exception.
- */
-class DataException extends RuntimeException implements DataExceptionInterface
+interface PrePersistInterface
 {
+    /**
+     * Returns an iterable of callbacks. These will be called before persisting
+     * the entity.
+     *
+     * @return callable[]
+     */
+    public function getPrePersistCallables(): iterable;
 }

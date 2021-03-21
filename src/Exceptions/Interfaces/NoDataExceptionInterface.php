@@ -8,14 +8,11 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Exceptions;
-
-use eArc\Data\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
+namespace eArc\Data\Exceptions\Interfaces;
 
 /**
- * Generic data exception.
+ * Is thrown if no data could be loaded.
  */
-class DataException extends RuntimeException implements DataExceptionInterface
+interface NoDataExceptionInterface extends DataExceptionInterface
 {
 }

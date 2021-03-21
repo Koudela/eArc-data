@@ -8,14 +8,11 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\Data\Exceptions;
-
-use eArc\Data\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
+namespace eArc\Data\Entity\Interfaces;
 
 /**
- * Generic data exception.
+ * Identifies an object as an entity.
  */
-class DataException extends RuntimeException implements DataExceptionInterface
+interface EntityBaseInterface
 {
 }

@@ -3,7 +3,7 @@
     "description": "eArc - the explicit architecture framework - data component",
     "type": "library",
     "license": "MIT",
-    "version": "0.0-ALPHA",
+    "version": "dev-0.0",
     "authors": [
         {
             "name": "Thomas Koudela",
@@ -13,16 +13,19 @@
     "minimum-stability": "dev",
     "prefer-stable" : true,
     "require": {
-        "php": "^7.2",
-        "earc/component-di": "dev-master"
+        "php": "^8.0",
+        "earc/di": "3.0",
+        "earc/serializer": "^1.1"
     },
     "autoload": {
         "psr-4" : {
+            "\\" : "bootstrap/",
             "eArc\\Data\\" : "src/",
             "eArc\\DataTests\\" : "tests/"
         }
     },
     "require-dev": {
-        "behat/behat": "^3.5"
+        "phpunit/phpunit": "*",
+        "symfony/var-dumper": "*"
     }
 }

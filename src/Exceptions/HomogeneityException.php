@@ -10,12 +10,8 @@
 
 namespace eArc\Data\Exceptions;
 
-use eArc\Data\Exceptions\Interfaces\DataExceptionInterface;
-use RuntimeException;
+use eArc\Data\Exceptions\Interfaces\HomogeneityExceptionInterface;
 
-/**
- * Generic data exception.
- */
-class DataException extends RuntimeException implements DataExceptionInterface
+class HomogeneityException extends DataException implements HomogeneityExceptionInterface
 {
 }
