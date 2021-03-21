@@ -24,5 +24,5 @@ interface PreRemoveInterface
      *
      * @return callable[]
      */
-    public static function getPreRemoveCallables(): array;
+    public static function getPreRemoveCallables(): iterable;
 }

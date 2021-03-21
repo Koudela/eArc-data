@@ -16,6 +16,8 @@ use eArc\Data\Entity\Interfaces\Events\PostRemoveInterface;
 use eArc\Data\Entity\Interfaces\Events\PreLoadInterface;
 use eArc\Data\Entity\Interfaces\Events\PrePersistInterface;
 use eArc\Data\Entity\Interfaces\Events\PreRemoveInterface;
+use eArc\Data\Manager\Interfaces\Events\OnAutoPrimaryKeyInterface;
+use eArc\Data\Manager\Interfaces\Events\OnFindInterface;
 use eArc\Data\Manager\Interfaces\Events\OnLoadInterface;
 use eArc\Data\Manager\Interfaces\Events\OnPersistInterface;
 use eArc\Data\Manager\Interfaces\Events\OnRemoveInterface;
@@ -29,7 +31,10 @@ interface ParameterInterface
     const TAG_PRE_PERSIST = PrePersistInterface::class;
     const TAG_PRE_REMOVE = PreRemoveInterface::class;
 
+    const TAG_ON_AUTO_PRIMARY_KEY = OnAutoPrimaryKeyInterface::class;
+
     const TAG_ON_LOAD = OnLoadInterface::class;
     const TAG_ON_PERSIST = OnPersistInterface::class;
     const TAG_ON_REMOVE = OnRemoveInterface::class;
+    const TAG_ON_FIND = OnFindInterface::class;
 }

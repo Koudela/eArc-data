@@ -15,6 +15,7 @@ use eArc\Data\Entity\Interfaces\Events\PostRemoveInterface;
 use eArc\Data\Entity\Interfaces\Events\PreLoadInterface;
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Entity\Interfaces\Events\PreRemoveInterface;
+use eArc\Data\Entity\Interfaces\ImmutableEntityInterface;
 use eArc\Data\Exceptions\DataException;
 use eArc\Data\Exceptions\NoDataException;
 use eArc\Data\Manager\Interfaces\DataStoreInterface;
@@ -27,9 +28,13 @@ class DataStore implements DataStoreInterface
     /** @var EntityInterface[][] */
     protected array $entities = [];
 
-    public function load(string $fQCN, string $primaryKey): EntityInterface
+    public function load(string $fQCN, string $primaryKey, bool $useDataStoreOnly = false): EntityInterface|null
     {
         if (!$this->isLoaded($fQCN, $primaryKey)) {
+            if ($useDataStoreOnly) {
+                return null;
+            }
+
             foreach (di_get_tagged(ParameterInterface::TAG_PRE_LOAD) as $service) {
                 $service = di_static($service);
                 if (!$service instanceof PreLoadInterface) {
@@ -98,7 +103,7 @@ class DataStore implements DataStoreInterface
         return isset($this->entities[$fQCN][$primaryKey]);
     }
 
-    public function detach(?string $fQCN = null, ?array $primaryKeys = null): void
+    public function detach(string|null $fQCN = null, array|null $primaryKeys = null): void
     {
         if (null!==$fQCN) {
             if (null!==$primaryKeys) {
@@ -117,13 +122,19 @@ class DataStore implements DataStoreInterface
         $this->entities = [];
     }
 
-    public function delete(EntityInterface $entity): void
+    public function delete(EntityInterface $entity, bool $force = false): void
     {
-        $this->remove($entity::class, $entity->getPrimaryKey());
+        $this->remove($entity::class, $entity->getPrimaryKey(), $force);
     }
 
-    public function remove(string $fQCN, string $primaryKey): void
+    public function remove(string $fQCN, string $primaryKey, bool $force = false): void
     {
+        if (!$force && $fQCN instanceof ImmutableEntityInterface) {
+            throw new DataException(
+                '{2055c126-1148-4c8b-ab1e-e607e9e919d4} The force flag has to been set in order to remove the data of an immutable entity.'
+            );
+        }
+
         unset($this->entities[$fQCN][$primaryKey]);
 
         foreach (di_get_tagged(ParameterInterface::TAG_PRE_REMOVE) as $service) {

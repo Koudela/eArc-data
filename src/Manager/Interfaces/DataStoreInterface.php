@@ -18,16 +18,18 @@ interface DataStoreInterface
 {
     /**
      * Get the entity object the fully qualified class name and the primary key
-     * relates to.
+     * relates to. If the useDataStoreOnly flag is set and the entity is not loaded
+     * already null is returned.
      *
      * @param string $fQCN
      * @param string $primaryKey
+     * @param bool $useDataStoreOnly
      *
      * @return EntityInterface
      *
      * @throws NoDataExceptionInterface|SerializeExceptionInterface
      */
-    public function load(string $fQCN, string $primaryKey): EntityInterface;
+    public function load(string $fQCN, string $primaryKey, bool $useDataStoreOnly = false): EntityInterface|null;
 
     /**
      * Checks whether the entity object the fully qualified class name and
@@ -46,23 +48,26 @@ interface DataStoreInterface
      * @param string|null $fQCN
      * @param string[]|null $primaryKeys
      */
-    public function detach(?string $fQCN = null, ?array $primaryKeys = null): void;
+    public function detach(string|null $fQCN = null, array|null $primaryKeys = null): void;
 
     /**
      * Deletes the persisted data the entity relates to and clears the entity from
-     * data store cache.
+     * data store cache. To delete immutable entities the force parameter has to
+     * been set to true.
      *
      * @param EntityInterface $entity
+     * @param bool $force
      */
-    public function delete(EntityInterface $entity): void;
+    public function delete(EntityInterface $entity, bool $force = false): void;
 
     /**
      * Deletes the persisted data the fully qualified class name and the primary
      * key relates to. If present in the data store cache it also purges the entity
-     * from it.
+     * from it. To delete immutable entities the force parameter has to been set
+     * to true.
      *
      * @param string $fQCN
      * @param string $primaryKey
      */
-    public function remove(string $fQCN, string $primaryKey): void;
+    public function remove(string $fQCN, string $primaryKey, bool $force = false): void;
 }

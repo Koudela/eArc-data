@@ -39,9 +39,17 @@ class EmbeddedCollection extends AbstractBaseCollection implements EmbeddedColle
             if (!array_key_exists($key, $indexedProperties)) {
                 throw new QueryException(sprintf('{56c6e168-8dd4-46b6-b3ee-096155473f50} %s is not a property of %s.', $key, $this->fQCN));
             }
-            foreach ($items as $itemKey => $item) {
-                if ($indexedProperties[$key]->getValue($item) !== $value) {
-                    unset($items[$itemKey]);
+            if (is_array($value)) {
+                foreach ($items as $itemKey => $item) {
+                    if (!in_array($indexedProperties[$key]->getValue($item), $value)) {
+                        unset($items[$itemKey]);
+                    }
+                }
+            } else {
+                foreach ($items as $itemKey => $item) {
+                    if ($indexedProperties[$key]->getValue($item) !== $value) {
+                        unset($items[$itemKey]);
+                    }
                 }
             }
         }

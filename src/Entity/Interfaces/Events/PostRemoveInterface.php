@@ -21,5 +21,5 @@ interface PostRemoveInterface
      *
      * @return callable[]
      */
-    public static function getPostRemovedCallables(): array;
+    public static function getPostRemovedCallables(): iterable;
 }

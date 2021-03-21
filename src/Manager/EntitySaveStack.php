@@ -13,8 +13,12 @@ namespace eArc\Data\Manager;
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Entity\Interfaces\Events\PostPersistInterface;
 use eArc\Data\Entity\Interfaces\Events\PrePersistInterface;
+use eArc\Data\Entity\Interfaces\ImmutableEntityInterface;
+use eArc\Data\Entity\Interfaces\PrimaryKey\AutoPrimaryKeyInterface;
 use eArc\Data\Exceptions\DataException;
+use eArc\Data\Exceptions\NoDataException;
 use eArc\Data\Manager\Interfaces\EntitySaveStackInterface;
+use eArc\Data\Manager\Interfaces\Events\OnAutoPrimaryKeyInterface;
 use eArc\Data\Manager\Interfaces\Events\OnPersistInterface;
 use eArc\Data\ParameterInterface;
 
@@ -28,7 +32,7 @@ class EntitySaveStack implements EntitySaveStackInterface
         $this->entitySaveStack[spl_object_id($entity)] = $entity;
     }
 
-    public function persist(EntityInterface|null $entity): void
+    public function persist(EntityInterface|null $entity = null): null|string
     {
         foreach ($this->entitySaveStack as $key => $item) {
             $this->save($item);
@@ -38,7 +42,11 @@ class EntitySaveStack implements EntitySaveStackInterface
 
         if (!is_null($entity)) {
             $this->save($entity);
+
+            return $entity->getPrimaryKey();
         }
+
+        return null;
     }
 
     protected function save(EntityInterface $entity): void
@@ -60,6 +68,28 @@ class EntitySaveStack implements EntitySaveStackInterface
             foreach ($entity->getPrePersistCallables() as $callable) {
                 $callable($entity);
             }
+        }
+
+        if ($entity instanceof ImmutableEntityInterface && !is_null($entity->getPrimaryKey())) {
+            try {
+                data_load(get_class($entity), $entity->getPrimaryKey());
+                if ($entity instanceof AutoPrimaryKeyInterface) {
+                    $entity->setPrimaryKey(null);
+                } else {
+                    throw new DataException(sprintf(
+                        '{d98eb0dc-9cb1-490f-807d-e5089ee85112} Data exists already for immutable entity %s and primary key %s.',
+                        get_class($entity),
+                        $entity->getPrimaryKey()
+                    ));
+                }
+            } catch (NoDataException $noDataException) {
+                // we can go on and save the immutable entity as the primary key is not in use
+                unset($noDataException);
+            }
+        }
+
+        if (is_null($entity->getPrimaryKey())) {
+            $this->generatePrimaryKey($entity);
         }
 
         foreach (di_get_tagged(ParameterInterface::TAG_ON_PERSIST) as $service) {
@@ -99,6 +129,35 @@ class EntitySaveStack implements EntitySaveStackInterface
             foreach ($entity->getPostPersistCallables() as $callable) {
                 $callable($entity);
             }
+        }
+    }
+
+    protected function generatePrimaryKey(EntityInterface $entity): void
+    {
+        if ($entity instanceof AutoPrimaryKeyInterface) {
+            foreach (di_get_tagged(ParameterInterface::TAG_ON_AUTO_PRIMARY_KEY) as $service) {
+                $service = di_get($service);
+                if (!$service instanceof OnAutoPrimaryKeyInterface) {
+                    throw new DataException(sprintf(
+                        '{ac171999-74a1-43b4-a1b1-a6a47cc7a2cb} Services tagged by the %s have to implement it.',
+                        OnAutoPrimaryKeyInterface::class
+                    ));
+                }
+                foreach ($service->getOnAutoPrimaryKeyCallables() as $callable) {
+                    if ($primaryKey = $callable($entity)) {
+                        $entity->setPrimaryKey($primaryKey);
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (is_null($entity->getPrimaryKey())) {
+            throw new DataException(sprintf(
+                '{bd5a6da9-1c3b-4b9c-8004-84913ba96425} Primary key has not been set for class %s.',
+                get_class($entity)
+            ));
         }
     }
 }

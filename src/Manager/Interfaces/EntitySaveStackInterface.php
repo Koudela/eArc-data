@@ -30,6 +30,8 @@ interface EntitySaveStackInterface
      * Can be called with the null argument to save the scheduled entities only.
      *
      * @param EntityInterface|null $entity
+     *
+     * @return string|null
      */
-    public function persist(EntityInterface|null $entity): void;
+    public function persist(EntityInterface|null $entity = null): string|null;
 }
