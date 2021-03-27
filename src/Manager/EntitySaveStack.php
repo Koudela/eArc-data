@@ -59,15 +59,12 @@ class EntitySaveStack implements EntitySaveStackInterface
                     PrePersistInterface::class
                 ));
             }
-            foreach ($service->getPrePersistCallables() as $callable) {
-                $callable($entity);
-            }
+            $service->prePersist($entity);
         }
 
         if ($entity instanceof PrePersistInterface) {
-            foreach ($entity->getPrePersistCallables() as $callable) {
-                $callable($entity);
-            }
+            /** @var $entity EntityInterface|PrePersistInterface */
+            $entity->prePersist($entity);
         }
 
         if ($entity instanceof ImmutableEntityInterface && !is_null($entity->getPrimaryKey())) {
@@ -100,12 +97,10 @@ class EntitySaveStack implements EntitySaveStackInterface
                     OnPersistInterface::class
                 ));
             }
-            foreach ($service->getOnPersistCallables() as $callable) {
-                $callable($entity);
-            }
+            $service->onPersist($entity);
         }
 
-        if (is_null($entity->getPrimaryKey())) {
+        if (is_null($entity->getPrimaryKey()) || $entity->getPrimaryKey() === '') {
             throw new DataException(sprintf(
                 '{4be1fe92-0afe-4a2f-8d6c-549fc30e24d0} The entity has no primary key and was probably not saved.'
             ));
@@ -120,15 +115,12 @@ class EntitySaveStack implements EntitySaveStackInterface
                     PostPersistInterface::class
                 ));
             }
-            foreach ($service->getPostPersistCallables() as $callable) {
-                $callable($entity);
-            }
+            $service->postPersist($entity);
         }
 
         if ($entity instanceof PostPersistInterface) {
-            foreach ($entity->getPostPersistCallables() as $callable) {
-                $callable($entity);
-            }
+            /** @var $entity PostPersistInterface|EntityInterface */
+            $entity->postPersist($entity);
         }
     }
 
@@ -143,12 +135,11 @@ class EntitySaveStack implements EntitySaveStackInterface
                         OnAutoPrimaryKeyInterface::class
                     ));
                 }
-                foreach ($service->getOnAutoPrimaryKeyCallables() as $callable) {
-                    if ($primaryKey = $callable($entity)) {
-                        $entity->setPrimaryKey($primaryKey);
+                $primaryKey = $service->onAutoPrimaryKey($entity);
+                if (!is_null($primaryKey)) {
+                    $entity->setPrimaryKey($primaryKey);
 
-                        break;
-                    }
+                    break;
                 }
             }
         }

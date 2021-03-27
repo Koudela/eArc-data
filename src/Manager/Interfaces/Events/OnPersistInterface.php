@@ -10,17 +10,18 @@
 
 namespace eArc\Data\Manager\Interfaces\Events;
 
+use eArc\Data\Entity\Interfaces\EntityInterface;
+
 interface OnPersistInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called in order to save the
-     * data of the entity.
+     * Will be called in order to save the data of the entity.
      *
-     * All callables of all tagged Services are called. Thus there can be services
-     * persisting to database(s), services persisting to search indices and services
-     * caching the entity by shared memory, redis server or other means.
+     * All tagged Services are called. Thus there can be services persisting to
+     * database(s), services persisting to search indices and services caching
+     * the entity by shared memory, redis server or other means.
      *
-     * @return callable[]
+     * @param EntityInterface $entity
      */
-    public function getOnPersistCallables(): iterable;
+    public function onPersist(EntityInterface $entity): void;
 }

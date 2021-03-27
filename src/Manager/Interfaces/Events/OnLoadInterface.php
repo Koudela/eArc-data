@@ -10,18 +10,21 @@
 
 namespace eArc\Data\Manager\Interfaces\Events;
 
+use eArc\Data\Entity\Interfaces\EntityInterface;
+
 interface OnLoadInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called for creating the
-     * entity from the data.
+     * Will be called for creating the entity from the data.
      *
-     * As soon as the one callable of one tagged Service returns an entity the
-     * other registered services and callables are skipped. Thus for example if
-     * the entity is found in shared memory it does not need to be looked up in
-     * the database.
+     * As soon as the one tagged Service returns an entity the other registered
+     * services and callables are skipped. Thus for example if the entity is found
+     * in shared memory it does not need to be looked up in the database.
      *
-     * @return callable[]
+     * @param string $fQCN
+     * @param string $primaryKey
+     *
+     * @return EntityInterface|null
      */
-    public function getOnLoadCallables(): iterable;
+    public function onLoad(string $fQCN, string $primaryKey): EntityInterface|null;
 }

@@ -10,18 +10,23 @@
 
 namespace eArc\Data\Manager\Interfaces\Events;
 
+use eArc\Data\Exceptions\Interfaces\QueryExceptionInterface;
+
 interface OnFindInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called in order to retrieve
-     * the result of the data_find function.
+     * Will be called in order to retrieve the result of the data_find function.
      *
-     * As soon as the one callable of one tagged Service returns an array the
-     * other registered services and callables are skipped. Thus for example if
-     * the result is found in the search index it need not to be looked up in
-     * the cache or database.
+     * As soon as the one tagged Service returns an array the other registered
+     * services and callables are skipped. Thus for example if the result is found
+     * in the search index it need not to be looked up in the cache or database.
      *
-     * @return callable[]
+     * @param string $fQCN
+     * @param array $keyValuePairs
+     *
+     * @return string[]|null
+     *
+     * @throws QueryExceptionInterface
      */
-    public function getOnFindCallables(): iterable;
+    public function onFind(string $fQCN, array $keyValuePairs): array|null;
 }

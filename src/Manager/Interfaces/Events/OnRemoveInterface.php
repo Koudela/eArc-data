@@ -13,15 +13,15 @@ namespace eArc\Data\Manager\Interfaces\Events;
 interface OnRemoveInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called for removing the
-     * entity from the data.
+     * Will be called for removing the entity from the data.
      *
-     * All callables of all tagged Services are called. Thus there can be services
-     * removing the data from database(s), services removing the data from search
-     * indices and services removing the data from shared memory cache, redis server
-     * or other means.
+     * All tagged Services are called. Thus there can be services removing the
+     * data from database(s), services removing the data from search indices and
+     * services removing the data from shared memory cache, redis server or
+     * other means.
      *
-     * @return callable[]
+     * @param string $fQCN
+     * @param string $primaryKey
      */
-    public function getOnRemoveCallables(): iterable;
+    public function onRemove(string $fQCN, string $primaryKey): void;
 }

@@ -10,18 +10,21 @@
 
 namespace eArc\Data\Manager\Interfaces\Events;
 
+use eArc\Data\Entity\Interfaces\PrimaryKey\AutoPrimaryKeyInterface;
+
 interface OnAutoPrimaryKeyInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called in order to
-     * generate a primary key, if a entity without primary key and with
-     * `AutoPrimaryKeyInterface` is persisted.
+     * Will be called in order to generate a primary key, if a entity without
+     * primary key and with `AutoPrimaryKeyInterface` is persisted.
      *
-     * As soon as the one callable of one tagged Service returns an string result
-     * the other registered services and callables are skipped. Thus there is only
-     * on generated key even if more callables are applicable.
+     * As soon as the one tagged Service returns an string result the other
+     * registered services are skipped. Thus there is only one generated key
+     * even if more services are applicable.
      *
-     * @return callable[]
+     * @param AutoPrimaryKeyInterface $entity
+     *
+     * @return string|null
      */
-    public function getOnAutoPrimaryKeyCallables(): iterable;
+    public function onAutoPrimaryKey(AutoPrimaryKeyInterface $entity): string|null;
 }

@@ -42,8 +42,14 @@ section for a deeper insight.
         - [via entity](#via-entity)
         - [via service](#via-service)
     - [autogenerate keys](#autogenerate-keys)
+    - [bridges](#bridges)
 - [advanced usage](#advanced-usage)
     - [writing your own bridge](#writing-your-own-bridge)
+    - [on data persist](#on-data-persist)
+    - [on data load](#on-data-load)
+    - [on data remove](#on-data-remove)
+    - [on data find](#on-data-find)
+    - [on primary key generation](#on-primary-key-generation)
 - [releases](#releases)
     - [release v0.0](#release-v00)
 
@@ -111,6 +117,8 @@ di_tag(ParameterInterface::TAG_ON_REMOVE, MySearchIndexBridge::class);
 
 di_tag(ParameterInterface::TAG_ON_FIND, MySearchIndexBridge::class);
 di_tag(ParameterInterface::TAG_ON_FIND, MyDataBaseBridge::class);
+
+di_tag(ParameterInterface::TAG_ON_AUTO_PRIMARY_KEY, MyDataBaseBridge::class);
 ```
 
 After that entities can be loaded and saved via the `data_*` functions.
@@ -405,15 +413,14 @@ first you may encounter unexpected behaviour.
 
 There are six livecycle events. They are represented by six interfaces (`PreLoadInterface`,
 `PostLoadInterface`, `PrePersistInterface`, `PostPersistInterface`, `PreRemoveInterface`,
-`PostRemoveInterface`). Each event exists as entity event and as service event. The
-service event is triggered prior the entity event. The callables of the registered 
-services are called every time the event is triggered, the callables of the entity 
-only if the entity is affected by the event.
+`PostRemoveInterface`). Each event exists as entity event and as service event.
+The service event is triggered prior the entity event. The interface method of 
+the registered services are called every time the event is triggered, the 
+interface methods of the entity only if the entity is affected by the event.
 
-Any callable that is returned by the interface method will be called with the 
-entity (if the method is non static) or class name and primary key 
-(if the method is static). Returns are not evaluated, thus void callables
-are recommended.
+Any interface method will be called with the entity (if the method is not static) 
+or class name and primary key (if the method is static). Returns are not evaluated, 
+thus all interface methods have void return types.
 
 #### via entity
 
@@ -426,6 +433,7 @@ A cascade persist can be implemented as follows:
 
 ```php
 use eArc\Data\Entity\AbstractEntity;
+use eArc\Data\Entity\Interfaces\EntityInterface;
 use \eArc\Data\Entity\Interfaces\Events\PrePersistInterface;
 
 class MyReverencedEntity extends AbstractEntity {/*...*/}
@@ -444,16 +452,11 @@ class MyEntity extends AbstractEntity implements PrePersistInterface
         return data_load(MyReverencedEntity::class, $this->myReverencedEntityPK);
     }
     
-    public function cascadePersist(MyEntity $myEntity): void
+    public function prePersist(EntityInterface $entity): void
     {
         if ($entity = \data_load(MyReverencedEntity::class, $this->myReverencedEntityPK, true)) {
             \data_persist($entity);        
         }
-    }
-    
-    public function getPrePersistCallables() : iterable
-    {
-        yield [$this, 'cascadePersist'];
     }
 }
 ```
@@ -470,7 +473,7 @@ or your application is slowed down unnecessarily.
 ```php
 use eArc\Data\Entity\Interfaces\Events\PreRemoveInterface;
 
-di_tag(PreRemoveInterface::class, MyPreRemoveService::class);
+\di_tag(PreRemoveInterface::class, MyPreRemoveService::class); // <- this comes in your bootstrap section
 
 
 class MyPreRemoveService implements PreRemoveInterface 
@@ -478,11 +481,6 @@ class MyPreRemoveService implements PreRemoveInterface
     public static function preRemove(string $fQCN, string $primaryKey): void
     {
         // pre remove logic goes here...
-    }
-    
-    public static function getPreRemoveCallables(): iterable
-    {
-        yield [MyPreRemoveService::class, 'preRemove']; 
     }
 }
 ```
@@ -501,10 +499,136 @@ will be called (with the entity as argument) until a string is returned. This
 string is set as primary key.
 
 You are completely in charge and responsible for key generation. You can use 
-for example attribute driven libraries or write your own generators.
+for example attribute driven libraries or write your own generators. Some bridges 
+may handle this too.
+
+### bridges
+
+earc/data is an abstraction layer. It is responsible for two major apis: 1. It
+is an api you call to save/load and in a restricted way find your entities, without
+bothering about the persisting media (filesystem, databases, memory, search indexes,
+etc.). 2. It is an api where the persisting infrastructure plugs in.
+
+It was all about the first api until now. The bridges chapter is about the second
+api. It tells you how to plug in the persisting infrastructure.
+
+There are five livecycle events that call upon the persisting media, each have a
+tag and an interface:
+- data persist -> `OnPersistInterface` -> `ParameterInterface::TAG_ON_PERSIST`
+- data load -> `OnLoadInterface` -> `ParameterInterface::TAG_ON_LOAD`
+- data remove -> `OnPersistInterface` -> `ParameterInterface::TAG_ON_PERSIST`
+- data find -> `OnFindInterface` -> `ParameterInterface::TAG_ON_FIND`
+- primary key generation -> `OnAutoPrimaryKeyInterface` -> `ParameterInterface::TAG_ON_AUTO_PRIMARY_KEY`
+
+Any library implementing this five interfaces is a valid bridge for earc/data. 
+
+Some library will only implement a subset. Think of a search index. Only the 
+data persist/remove events are relevant for it.
+
+TODO: List of existing bridges
+
+#### plug in a bridge
+
+To activate this bridge you have to tag the interfaces.
+
+```php
+use eArc\Data\ParameterInterface;
+
+di_tag(ParameterInterface::TAG_ON_PERSIST, MyDataBaseBridge::class);
+di_tag(ParameterInterface::TAG_ON_LOAD, MyDataBaseBridge::class);
+di_tag(ParameterInterface::TAG_ON_REMOVE, MyDataBaseBridge::class);
+di_tag(ParameterInterface::TAG_ON_FIND, MyDataBaseBridge::class);
+di_tag(ParameterInterface::TAG_ON_AUTO_PRIMARY_KEY, MyDataBaseBridge::class);
+```
+
+You can register as many services as you like. The order of tagging is the order
+they will be called.
+
+Tagging has to be done after initializing the dependency injection component 
+[earc/di](https://github.com/Koudela/eArc-di) and before calling any `data_*` 
+function.
+
+```php
+use eArc\DI\DI;
+
+DI::init();
+```
+
+You can skip initializing earc/di, if you initialize earc/data first.
+
+```php
+BootstrapEArcData::init();
+```
+
+This will init earc/di as well.
 
 ## advanced usage
+
+If there is no bridge available for your persistence infrastructure, or you need
+maximal control of the persisting process, you can write your own bridge.
+
 ### writing your own bridge
+
+For writing a bridge all you have to do is to implement the interfaces
+for the data persist/load/remove/find and primary key generation events.
+
+#### on data persist
+
+The `onPersist()` method of the `OnPersistInterface` will be called with the 
+entity to persist as argument. Persistence must not fail silently.
+
+If you use a key-value store you can use the `SerializerType` and the 
+[earc/serializer](https://github.com/Koudela/eArc-serializer) 
+for proper serialization and deserialization. 
+
+#### on data load
+
+The `onLoad()` method of the `OnLoadInterface` will be called with fully 
+qualified class name and the primary key of the entity as arguments. It has to 
+return the entity object on success. If the entity could not be found the callable
+must not throw an error, but return null. Other services may return the entity
+object thereafter. 
+
+If you use a key-value store you can use the `SerializerType` and the 
+[earc/serializer](https://github.com/Koudela/eArc-serializer) for proper
+serialization and deserialization. 
+
+#### on data remove
+
+The `onRemove()` method of the `OnReturnInterface` will be called with fully 
+qualified class name and the primary key of the entity as arguments. Removing an 
+entity must not fail silently unless it has not existed yet.
+
+#### on data find
+
+The `onFind()` method of the `OnFindInterface` will be called with fully 
+qualified class name and key-value-pairs of the entity as arguments. It has to 
+return an array of primary keys. It may be empty if no entity fits to the 
+key-value-pairs. They have to return null, if they cannot process the 
+key-value-pairs because of the infrastructure or missing data, but they have to 
+throw an earc/data `QueryExceptionInterface` if just a configuration or index is 
+missing.
+
+The empty key-value-pairs array witch has to return all existing primary keys of
+the entity class has to be supported always. The other key-value-pairs may not be 
+supported or depend on configuration or indices. 
+
+Key value pairs have to be joint via logic `AND`. Value arrays have to be 
+interpreted as `IN`.
+
+For example `callable(User::class, ['firstname' => 'Max', 'age' => [18, 19, 20, 21, 22, 23])`
+has to return all users with first name Max and age between 18 and 23.
+
+#### on primary key generation
+
+The `onAutoPrimaryKey()` method of the `OnAutoPrimaryKeyInterface` will be called 
+with the entity in need for a new primary key as argument. It has to return a
+string, or null if it is not willing to process the request.
+
+The key generation is called upon before saving the entity. This may be a contradiction
+to the infrastructure, for example if the entity is persisted to a sql database
+which generates the key. In these cases the method has to return an empty 
+string. Of course this must be recognised by the on data persist services.
 
 ## releases
 

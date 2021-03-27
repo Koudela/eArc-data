@@ -10,17 +10,18 @@
 
 namespace eArc\Data\Entity\Interfaces\Events;
 
+use eArc\Data\Entity\Interfaces\EntityInterface;
+
 interface PostLoadInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called after creating the
-     * entity from the data.
+     * Will be called after creating the entity from the data.
      *
      * Hint: Use this interface emulate the constructor or a wakeup as earc/data
      * may create entities from data without calling the constructor or the php
      * owned __wakeup magic method.
      *
-     * @return callable[]
+     * @param EntityInterface $entity
      */
-    public function getPostLoadCallables(): iterable;
+    public function postLoad(EntityInterface $entity): void;
 }

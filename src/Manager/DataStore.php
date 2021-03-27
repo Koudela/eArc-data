@@ -43,15 +43,12 @@ class DataStore implements DataStoreInterface
                         PreLoadInterface::class
                     ));
                 }
-                foreach ($service::getPreLoadCallables() as $callable) {
-                    $callable($fQCN, $primaryKey);
-                }
+                $service::preLoad($fQCN, $primaryKey);
             }
 
             if ($fQCN instanceof PreLoadInterface) {
-                foreach ($fQCN::getPreLoadCallables() as $callable) {
-                    $callable($fQCN, $primaryKey);
-                }
+                /** @var $fQCN string|PreLoadInterface */
+                $fQCN::preLoad($fQCN, $primaryKey);
             }
 
             foreach (di_get_tagged(ParameterInterface::TAG_ON_LOAD) as $service) {
@@ -62,11 +59,9 @@ class DataStore implements DataStoreInterface
                         OnLoadInterface::class
                     ));
                 }
-                foreach ($service->getOnLoadCallables() as $callable) {
-                    $entity = $callable($fQCN, $primaryKey);
-                    if ($entity instanceof EntityInterface) {
-                        break;
-                    }
+                $entity = $service->onLoad($fQCN, $primaryKey);
+                if ($entity instanceof EntityInterface) {
+                    break;
                 }
             }
 
@@ -83,15 +78,11 @@ class DataStore implements DataStoreInterface
                         PostLoadInterface::class
                     ));
                 }
-                foreach ($service->getPostLoadCallables() as $callable) {
-                    $callable($entity);
-                }
+                $service->postLoad($entity);
             }
 
             if ($entity instanceof PostLoadInterface) {
-                foreach ($entity->getPostLoadCallables() as $callable) {
-                    $callable($entity);
-                }
+                $entity->postLoad($entity);
             }
         }
 
@@ -145,15 +136,12 @@ class DataStore implements DataStoreInterface
                     PreRemoveInterface::class
                 ));
             }
-            foreach ($service::getPreRemoveCallables() as $callable) {
-                $callable($fQCN, $primaryKey);
-            }
+            $service::preRemove($fQCN, $primaryKey);
         }
 
         if ($fQCN instanceof PreRemoveInterface) {
-            foreach ($fQCN::getPreRemoveCallables() as $callable) {
-                $callable($fQCN, $primaryKey);
-            }
+            /** @var $fQCN string|PreRemoveInterface */
+            $fQCN::preRemove($fQCN, $primaryKey);
         }
 
         foreach (di_get_tagged(ParameterInterface::TAG_ON_REMOVE) as $service) {
@@ -164,9 +152,7 @@ class DataStore implements DataStoreInterface
                     OnRemoveInterface::class
                 ));
             }
-            foreach ($service->getOnRemoveCallables() as $callable) {
-                $callable($fQCN, $primaryKey);
-            }
+            $service->onRemove($fQCN, $primaryKey);
         }
 
         foreach (di_get_tagged(ParameterInterface::TAG_POST_REMOVE) as $service) {
@@ -177,15 +163,12 @@ class DataStore implements DataStoreInterface
                     PostRemoveInterface::class
                 ));
             }
-            foreach ($service::getPostRemovedCallables() as $callable) {
-                $callable($fQCN, $primaryKey);
-            }
+            $service::postRemove($fQCN, $primaryKey);
         }
 
         if ($fQCN instanceof PostRemoveInterface) {
-            foreach ($fQCN::getPostRemovedCallables() as $callable) {
-                $callable($fQCN, $primaryKey);
-            }
+            /** @var string|PostRemoveInterface $fQCN */
+            $fQCN::postRemove($fQCN, $primaryKey);
         }
     }
 }

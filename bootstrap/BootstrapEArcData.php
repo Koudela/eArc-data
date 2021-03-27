@@ -106,12 +106,10 @@ namespace {
                                 OnFindInterface::class
                             ));
                         }
-                        foreach ($service->getOnFindCallables() as $callable) {
-                            $result = $callable->findBy($fQCN, $keyValuePairs);
 
-                            if (is_array($result)) {
-                                return $result;
-                            }
+                        $result = $service->onFind($fQCN, $keyValuePairs);
+                        if (is_array($result)) {
+                            return $result;
                         }
                     }
 

@@ -10,15 +10,16 @@
 
 namespace eArc\Data\Entity\Interfaces\Events;
 
+use eArc\Data\Entity\Interfaces\EntityInterface;
+
 interface PostPersistInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called after persisting
-     * the entity.
+     * Will be called after persisting the entity.
      *
      * Hint: Use this interface to cascade persistence.
      *
-     * @return callable[]
+     * @param EntityInterface $entity
      */
-    public function getPostPersistCallables(): iterable;
+    public function postPersist(EntityInterface $entity): void;
 }

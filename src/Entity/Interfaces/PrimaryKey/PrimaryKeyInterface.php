@@ -10,8 +10,6 @@
 
 namespace eArc\Data\Entity\Interfaces\PrimaryKey;
 
-use eArc\Data\Entity\Interfaces\EntityInterface;
-
 interface PrimaryKeyInterface
 {
     /**

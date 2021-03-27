@@ -10,8 +10,8 @@
 
 namespace eArc\Data\Exceptions;
 
-use eArc\Data\Exceptions\Interfaces\DataExceptionInterface;
+use eArc\Data\Exceptions\Interfaces\QueryExceptionInterface;
 
-class QueryException extends DataException implements DataExceptionInterface
+class QueryException extends DataException implements QueryExceptionInterface
 {
 }

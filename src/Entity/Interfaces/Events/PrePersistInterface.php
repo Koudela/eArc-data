@@ -10,13 +10,14 @@
 
 namespace eArc\Data\Entity\Interfaces\Events;
 
+use eArc\Data\Entity\Interfaces\EntityInterface;
+
 interface PrePersistInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called before persisting
-     * the entity.
+     * Will be called before persisting the entity.
      *
-     * @return callable[]
+     * @param EntityInterface $entity
      */
-    public function getPrePersistCallables(): iterable;
+    public function prePersist(EntityInterface $entity): void;
 }

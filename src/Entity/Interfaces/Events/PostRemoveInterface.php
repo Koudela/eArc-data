@@ -13,13 +13,13 @@ namespace eArc\Data\Entity\Interfaces\Events;
 interface PostRemoveInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called after removal of
-     * the entities data.
+     * Will be called after removal of the entities data.
      *
      * Hint: This method is static as entities can be removed without loading
      * them.
      *
-     * @return callable[]
+     * @param string $fQCN
+     * @param string $primaryKey
      */
-    public static function getPostRemovedCallables(): iterable;
+    public static function postRemove(string $fQCN, string $primaryKey): void;
 }

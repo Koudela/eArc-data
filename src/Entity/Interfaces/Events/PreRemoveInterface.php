@@ -13,8 +13,7 @@ namespace eArc\Data\Entity\Interfaces\Events;
 interface PreRemoveInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called before the removal
-     * of the entities data.
+     * Will be called before the removal of the entities data.
      *
      * Hint 1: This method is static as entities can be removed without loading
      * them.
@@ -22,7 +21,8 @@ interface PreRemoveInterface
      * Hint 2: Use this interface in conjunction with the data_load function
      * to cascade deletion.
      *
-     * @return callable[]
+     * @param string $fQCN
+     * @param string $primaryKey
      */
-    public static function getPreRemoveCallables(): iterable;
+    public static function preRemove(string $fQCN, string $primaryKey): void;
 }

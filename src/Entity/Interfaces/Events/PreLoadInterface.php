@@ -13,12 +13,12 @@ namespace eArc\Data\Entity\Interfaces\Events;
 interface PreLoadInterface
 {
     /**
-     * Returns an iterable of callbacks. These will be called before loading the
-     * entity data.
+     * Will be called before loading the entity data.
      *
      * Hint: This method is static as the entity is not loaded yet.
      *
-     * @return callable[]
+     * @param string $fQCN
+     * @param string $primaryKey
      */
-    public static function getPreLoadCallables(): iterable;
+    public static function preLoad(string $fQCN, string $primaryKey): void;
 }
