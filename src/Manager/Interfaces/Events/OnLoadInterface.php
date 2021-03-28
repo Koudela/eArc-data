@@ -15,16 +15,16 @@ use eArc\Data\Entity\Interfaces\EntityInterface;
 interface OnLoadInterface
 {
     /**
-     * Will be called for creating the entity from the data.
+     * Will be called for creating the entities from the data.
      *
      * As soon as the one tagged Service returns an entity the other registered
      * services and callables are skipped. Thus for example if the entity is found
      * in shared memory it does not need to be looked up in the database.
      *
      * @param string $fQCN
-     * @param string $primaryKey
+     * @param string[] $primaryKeys
      *
-     * @return EntityInterface|null
+     * @return EntityInterface[]
      */
-    public function onLoad(string $fQCN, string $primaryKey): EntityInterface|null;
+    public function onLoad(string $fQCN, array $primaryKeys): array;
 }

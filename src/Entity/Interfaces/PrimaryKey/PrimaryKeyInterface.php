@@ -19,5 +19,5 @@ interface PrimaryKeyInterface
      *
      * @return string|null
      */
-    public function getPrimaryKey(): ?string;
+    public function getPrimaryKey(): string|null;
 }

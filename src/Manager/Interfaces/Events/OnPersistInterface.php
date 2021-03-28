@@ -15,13 +15,13 @@ use eArc\Data\Entity\Interfaces\EntityInterface;
 interface OnPersistInterface
 {
     /**
-     * Will be called in order to save the data of the entity.
+     * Will be called in order to save the data of one or more entities.
      *
      * All tagged Services are called. Thus there can be services persisting to
      * database(s), services persisting to search indices and services caching
      * the entity by shared memory, redis server or other means.
      *
-     * @param EntityInterface $entity
+     * @param EntityInterface[] $entities
      */
-    public function onPersist(EntityInterface $entity): void;
+    public function onPersist(array $entities): void;
 }

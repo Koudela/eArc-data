@@ -28,47 +28,74 @@ class DataStore implements DataStoreInterface
     /** @var EntityInterface[][] */
     protected array $entities = [];
 
-    public function load(string $fQCN, string $primaryKey, bool $useDataStoreOnly = false): EntityInterface|null
+    public function load(string $fQCN, array $primaryKeys, bool $useDataStoreOnly = false): array
     {
-        if (!$this->isLoaded($fQCN, $primaryKey)) {
-            if ($useDataStoreOnly) {
-                return null;
-            }
+        $entities = [];
+        $primaryKeysToLoad = [];
 
-            foreach (di_get_tagged(ParameterInterface::TAG_PRE_LOAD) as $service) {
-                $service = di_static($service);
-                if (!$service instanceof PreLoadInterface) {
-                    throw new DataException(sprintf(
-                        '{4c316e5c-d82d-4562-9eca-c029a2ed44fe} Services tagged by the %s have to implement it.',
-                        PreLoadInterface::class
-                    ));
+        foreach (array_flip($primaryKeys) as $primaryKey => $value) {
+            if ($this->isLoaded($fQCN, $primaryKey)) {
+                $entities[$primaryKey] = $this->entities[$fQCN][$primaryKey];
+            } else {
+                if ($useDataStoreOnly) {
+                    continue;
                 }
-                $service::preLoad($fQCN, $primaryKey);
-            }
 
-            if ($fQCN instanceof PreLoadInterface) {
-                /** @var $fQCN string|PreLoadInterface */
-                $fQCN::preLoad($fQCN, $primaryKey);
-            }
+                $primaryKeysToLoad[$primaryKey] = $primaryKey;
 
-            foreach (di_get_tagged(ParameterInterface::TAG_ON_LOAD) as $service) {
-                $service = di_get($service);
-                if (!$service instanceof OnLoadInterface) {
-                    throw new DataException(sprintf(
-                        '{c3680a93-cc0e-47d4-8d87-573398fcbc0d} Services tagged by the %s have to implement it.',
-                        OnLoadInterface::class
-                    ));
+                foreach (di_get_tagged(ParameterInterface::TAG_PRE_LOAD) as $service) {
+                    $service = di_static($service);
+                    if (!$service instanceof PreLoadInterface) {
+                        throw new DataException(sprintf(
+                            '{4c316e5c-d82d-4562-9eca-c029a2ed44fe} Services tagged by the %s have to implement it.',
+                            PreLoadInterface::class
+                        ));
+                    }
+                    $service::preLoad($fQCN, $primaryKey);
                 }
-                $entity = $service->onLoad($fQCN, $primaryKey);
+
+                if ($fQCN instanceof PreLoadInterface) {
+                    /** @var $fQCN string|PreLoadInterface */
+                    $fQCN::preLoad($fQCN, $primaryKey);
+                }
+            }
+        }
+
+        $primaryKeysNotLoaded = $primaryKeysToLoad;
+
+        foreach (di_get_tagged(ParameterInterface::TAG_ON_LOAD) as $service) {
+            $service = di_get($service);
+            if (!$service instanceof OnLoadInterface) {
+                throw new DataException(sprintf(
+                    '{c3680a93-cc0e-47d4-8d87-573398fcbc0d} Services tagged by the %s have to implement it.',
+                    OnLoadInterface::class
+                ));
+            }
+
+            foreach ($service->onLoad($fQCN, $primaryKeysNotLoaded) as $entity) {
                 if ($entity instanceof EntityInterface) {
-                    break;
+                    $primaryKey = $entity->getPrimaryKey();
+                    $entities[$primaryKey] = $entity;
+
+                    unset($primaryKeysNotLoaded[$primaryKey]);
                 }
             }
 
-            if (!isset($entity) || !$entity instanceof EntityInterface) {
-                throw new NoDataException(sprintf('{33248032-3410-4e3d-af50-5dd3c810e750} Failed to load data for %s - %s.', $fQCN, $primaryKey));
+            if (empty($primaryKeysNotLoaded)) {
+                break;
             }
-            $this->entities[$fQCN][$primaryKey] = $entity;
+        }
+
+        if (!empty($primaryKeysNotLoaded)) {
+            throw new NoDataException(sprintf(
+                '{33248032-3410-4e3d-af50-5dd3c810e750} Failed to load data for %s and primary keys [%s].',
+                $fQCN,
+                implode(', ', $primaryKeysNotLoaded)
+            ));
+        }
+
+        foreach ($primaryKeysToLoad as $primaryKey) {
+            $entity = $entities[$primaryKey];
 
             foreach (di_get_tagged(ParameterInterface::TAG_POST_LOAD) as $service) {
                 $service = di_get($service);
@@ -82,11 +109,14 @@ class DataStore implements DataStoreInterface
             }
 
             if ($entity instanceof PostLoadInterface) {
+                /** @var $entity EntityInterface|PostLoadInterface */
                 $entity->postLoad($entity);
             }
+
+            $this->entities[$fQCN][$primaryKey] = $entity;
         }
 
-        return $this->entities[$fQCN][$primaryKey];
+        return $entities;
     }
 
     public function isLoaded(string $fQCN, string $primaryKey): bool
@@ -113,12 +143,20 @@ class DataStore implements DataStoreInterface
         $this->entities = [];
     }
 
-    public function delete(EntityInterface $entity, bool $force = false): void
+    public function delete(array $entities, bool $force = false): void
     {
-        $this->remove($entity::class, $entity->getPrimaryKey(), $force);
+        $sortedEntities = [];
+
+        foreach ($entities as $entity) {
+            $sortedEntities[$entity::class][] = $entity->getPrimaryKey();
+        }
+
+        foreach ($sortedEntities as $fQCN => $primaryKeys) {
+            $this->remove($fQCN, $primaryKeys, $force);
+        }
     }
 
-    public function remove(string $fQCN, string $primaryKey, bool $force = false): void
+    public function remove(string $fQCN, array $primaryKeys, bool $force = false): void
     {
         if (!$force && $fQCN instanceof ImmutableEntityInterface) {
             throw new DataException(
@@ -126,22 +164,22 @@ class DataStore implements DataStoreInterface
             );
         }
 
-        unset($this->entities[$fQCN][$primaryKey]);
-
-        foreach (di_get_tagged(ParameterInterface::TAG_PRE_REMOVE) as $service) {
-            $service = di_static($service);
-            if (!$service instanceof PreRemoveInterface) {
-                throw new DataException(sprintf(
-                    '{19afae2d-5f2e-4308-9182-2e817f8c6349} Services tagged by the %s have to implement it.',
-                    PreRemoveInterface::class
-                ));
+        foreach ($primaryKeys as $primaryKey) {
+            foreach (di_get_tagged(ParameterInterface::TAG_PRE_REMOVE) as $service) {
+                $service = di_static($service);
+                if (!$service instanceof PreRemoveInterface) {
+                    throw new DataException(sprintf(
+                        '{19afae2d-5f2e-4308-9182-2e817f8c6349} Services tagged by the %s have to implement it.',
+                        PreRemoveInterface::class
+                    ));
+                }
+                $service::preRemove($fQCN, $primaryKey);
             }
-            $service::preRemove($fQCN, $primaryKey);
-        }
 
-        if ($fQCN instanceof PreRemoveInterface) {
-            /** @var $fQCN string|PreRemoveInterface */
-            $fQCN::preRemove($fQCN, $primaryKey);
+            if ($fQCN instanceof PreRemoveInterface) {
+                /** @var $fQCN string|PreRemoveInterface */
+                $fQCN::preRemove($fQCN, $primaryKey);
+            }
         }
 
         foreach (di_get_tagged(ParameterInterface::TAG_ON_REMOVE) as $service) {
@@ -152,23 +190,27 @@ class DataStore implements DataStoreInterface
                     OnRemoveInterface::class
                 ));
             }
-            $service->onRemove($fQCN, $primaryKey);
+            $service->onRemove($fQCN, $primaryKeys);
         }
 
-        foreach (di_get_tagged(ParameterInterface::TAG_POST_REMOVE) as $service) {
-            $service = di_static($service);
-            if (!$service instanceof PostRemoveInterface) {
-                throw new DataException(sprintf(
-                    '{174e73d8-efd9-475f-85d2-b1bfe3d4d008} Services tagged by the %s have to implement it.',
-                    PostRemoveInterface::class
-                ));
+        foreach ($primaryKeys as $primaryKey) {
+            unset($this->entities[$fQCN][$primaryKey]);
+
+            foreach (di_get_tagged(ParameterInterface::TAG_POST_REMOVE) as $service) {
+                $service = di_static($service);
+                if (!$service instanceof PostRemoveInterface) {
+                    throw new DataException(sprintf(
+                        '{174e73d8-efd9-475f-85d2-b1bfe3d4d008} Services tagged by the %s have to implement it.',
+                        PostRemoveInterface::class
+                    ));
+                }
+                $service::postRemove($fQCN, $primaryKey);
             }
-            $service::postRemove($fQCN, $primaryKey);
-        }
 
-        if ($fQCN instanceof PostRemoveInterface) {
-            /** @var string|PostRemoveInterface $fQCN */
-            $fQCN::postRemove($fQCN, $primaryKey);
+            if ($fQCN instanceof PostRemoveInterface) {
+                /** @var string|PostRemoveInterface $fQCN */
+                $fQCN::postRemove($fQCN, $primaryKey);
+            }
         }
     }
 }

@@ -22,16 +22,14 @@ interface EntitySaveStackInterface
     public function schedule(EntityInterface $entity): void;
 
     /**
-     * Creates/updates the persisted data the entity relates to. May create
-     * the primary key if the entity was not persisted yet.
+     * Creates/updates the persisted data the entities relates to. May create
+     * the primary key if a entity was not persisted yet.
      *
      * If entities are scheduled they will be saved first.
      *
-     * Can be called with the null argument to save the scheduled entities only.
+     * Can be called with the empty array to save the scheduled entities only.
      *
-     * @param EntityInterface|null $entity
-     *
-     * @return string|null
+     * @param EntityInterface[] $entities
      */
-    public function persist(EntityInterface|null $entity = null): string|null;
+    public function persist(array $entities): void;
 }

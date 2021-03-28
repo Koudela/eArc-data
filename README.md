@@ -11,8 +11,8 @@ without touching your business logic.
 It works best with key-value based persistence like you would use with a 
 [redis server](https://redis.io/) backed up by a search index server like 
 [elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html), 
-and a memory based entity caching. Checkout the eArc components [earc/data-redis](#TODO) 
-and earc/data-elasticsearch [earc/data-elasticsearch](#TODO)
+and a memory based entity caching. Checkout the eArc components [earc/data-redis](https://github.com/Koudela/eArc-data-redis) 
+and earc/data-elasticsearch [earc/data-elasticsearch](https://github.com/Koudela/eArc-data-elasticsearch)
 for easy integration.
 
 The usage of a traditional sql databases is possible too, but comes with a bit
@@ -29,7 +29,6 @@ section for a deeper insight.
         - [collections](#collections)
         - [embedded entities](#embedded-entities)
         - [embedded collections](#embedded-collections)
-        - [immutable entities](#immutable-entities)
     - [functions](#functions)
         - [data persist](#data-persist)
         - [data load](#data-load)
@@ -44,6 +43,8 @@ section for a deeper insight.
     - [autogenerate keys](#autogenerate-keys)
     - [bridges](#bridges)
 - [advanced usage](#advanced-usage)
+    - [immutable entities](#immutable-entities)
+    - [mutable references](#mutable-references)
     - [writing your own bridge](#writing-your-own-bridge)
     - [on data persist](#on-data-persist)
     - [on data load](#on-data-load)
@@ -314,15 +315,6 @@ entity and not an embedded collection earc/data neither guarantees that the data
 of the property is saved nor that it is not. It should be avoided, but it is not
 permitted. If you use your own bridge and serializer it may make sense.
 
-#### immutable entities
-
-Immutable entities are a special case of pure entities. They implement the 
-`ImmutableEntityInterface`. Immutable entities can not be updated and only 
-deleted with the force flag.
-
-If immutable entities implement the `AutoPrimaryKeyInterface` a new primary key
-will be generated on persist, if there is a data set with this primary key already.
-
 ### functions
 
 earc/data uses functions instead of services to give maximal freedom to your code.
@@ -335,11 +327,11 @@ one exception to the rule: if the entity implements the `OnAutoPrimaryKeyInterfa
 and at least one callable registered to the `OnAutoPrimaryKeyInterface` event 
 returns a string result. Then this result is used as primary key.
 
-`data_persist` returns the primary key as result.
-
 On calling `data_persist` all entities scheduled via `data_schedule` will be saved 
 first. `data_persist` can be called without argument, to trigger the saving of the
 scheduled entities without the need to explicit save any entity. 
+
+To save multiple entities there is a `data_persist_stack` function.
 
 #### data load
 
@@ -353,6 +345,8 @@ You can change this behaviour by calling `data_detach` in between. Please note t
 resulting behaviour might be unexpected for inattentive developers. Use with great
 care.
 
+There is a `data_load_stack` function to load multiple entities at once.
+
 #### data delete
 
 `data_delete` takes an entity as argument. It removes the entity data.
@@ -360,10 +354,14 @@ care.
 Entities implementing the `ImmutableEntityInterface` can only be deleted if the
 force flag has been set.
 
+This function has a multiple counterpart `data_delete_stack`.
+
 #### data remove
 
 `data_remove` takes the entity class name and primary key as arguments. It works
 as `data_delete` but without the need of the entity being loaded prior removal.
+
+To delete multiple entities of the same class use the `data_remove_stack` function.
 
 #### data find
 
@@ -525,7 +523,10 @@ Any library implementing this five interfaces is a valid bridge for earc/data.
 Some library will only implement a subset. Think of a search index. Only the 
 data persist/remove events are relevant for it.
 
-TODO: List of existing bridges
+There exist some prebuild bridges:
+- [redis bridge](https://github.com/Koudela/eArc-data-redis) key-value based database server
+- [elasticsearch bridge](https://github.com/Koudela/eArc-data-elasticsearch) search index
+- [filesystem bridge](https://github.com/Koudela/eArc-data-filesystem) filesystem as database or on the fly backup engine
 
 #### plug in a bridge
 
@@ -564,10 +565,190 @@ This will init earc/di as well.
 
 ## advanced usage
 
-If there is no bridge available for your persistence infrastructure, or you need
-maximal control of the persisting process, you can write your own bridge.
+### immutable entities
+
+Immutable entities are a special case of pure entities. They implement the
+`ImmutableEntityInterface`. Immutable entities can not be updated and only
+deleted with the force flag.
+
+If immutable entities implement the `AutoPrimaryKeyInterface` a new primary key
+will be generated on persist, if there is a data set with this primary key already.
+
+### mutable references
+
+A common use case for immutable entities is to track the changes of a common
+entity by a chain of immutables. You cannot reference the entity represented by
+the chain via the primary key as every immutable entity has its own primary key.
+You cannot use another key either, because you can not remove it from the older
+immutables. You may attach a counter and search for the maximal value, but that
+may slow down entity loading significantly as the chain grows.
+
+The solution is a second mutable entity which keeps track of the chain of immutables
+and updates its reverence. It can be a bit laborious and error-prone to manage
+this in your code. By implementing the `MutableReverenceKeyInterface` in the
+immutable entity the update of the mutable entity (which has to implement the
+`MutableEntityReferenceInterface`) is done automatically by earc/data.
+
+There are two restriction on this concept:
+1. The mutable entity has to have a primary key, when the mutable reverence from
+   the immutable to the mutable is established.
+2. There can only be one mutable reference entity. If you need more references from
+   other entities to the immutable, they have to use the mutable reference entity as
+   proxy.
+
+```php
+use eArc\Data\Entity\Interfaces\MutableEntityReferenceInterface;
+use eArc\Data\Entity\Interfaces\PrimaryKey\MutableReverenceKeyInterface;
+use eArc\Data\Entity\Interfaces\ImmutableEntityInterface;
+use eArc\Data\Entity\AbstractEntity;
+use eArc\Data\Exceptions\DataException;
+
+class MyClassReverencingAImmutable extends AbstractEntity implements MutableEntityReferenceInterface
+{
+    protected string|null $myImmutablePK;
+
+    //...
+
+    public function setMutableReverenceTarget(MutableReverenceKeyInterface $entity): void
+    {
+        $this->myImmutablePK = $entity->getPrimaryKey();
+    }
+    
+    public function getMyImmutable(): MyImmutable|null
+    {
+         return is_null($this->myImmutablePK) ? null : \data_load(MyImmutable::class, $this->myImmutablePK);
+    }
+    
+    public function setMyImmutable(MyImmutable $immutable)
+    {
+        // If the current class does not have a primary key yet, we have to persist it first.
+        // A post persist event does not reduce the effort and may lead into a infinity loop. 
+        // You may use the solution for reverences between two immutables to circumvent this.
+        if (is_null($this->primaryKey)) {
+            throw new DataException('Primary key is missing. Try to persist this entity first.');
+        }
+        
+        // The reverse key is set on persist.
+        $immutable->setMutableReverenceKey($this->primaryKey);
+    }
+    
+    //...
+}
+
+class MyImmutable extends AbstractEntity implements MutableReverenceKeyInterface, ImmutableEntityInterface
+{
+    protected string|null $mutableReferencePrimaryKey;
+
+    //...
+    
+    public function getMutableReverenceKey(): string
+    {
+        return $this->mutableReferencePrimaryKey;
+    }
+
+    public function setMutableReverenceKey(string $mutableReferencePrimaryKey): void
+    {
+        $this->mutableReferencePrimaryKey = $mutableReferencePrimaryKey;
+    }
+
+    public function getMutableReverenceClass(): string
+    {
+        return MyClassReverencingAImmutable::class;
+    }
+    
+    //...
+}
+
+class ReferenceUsingProxy extends AbstractEntity
+{
+    protected string $myImmutableProxyFQCN;
+    protected string $myImmutableProxyPK;
+    
+    //...
+    
+    public function setMyImmutable(MyImmutable $immutable) 
+    {
+        $this->myImmutableProxyFQCN = $immutable->getMutableReverenceClass();
+        $this->myImmutableProxyPK = $immutable->getMutableReverenceKey();
+    }
+    
+    public function getMyImmutable(): MyImmutable
+    {
+        $proxy = \data_load($this->myImmutableProxyFQCN, $this->myImmutableProxyPK)->getMyImmutable();
+        
+        return $proxy->getMyImmutable();
+    }
+    //...
+}
+```
+
+To implement a mutable reference between two immutable entity chains you can use the
+`GenericMutableEntityReference` as link between them.
+
+```php
+use eArc\Data\Entity\Interfaces\PrimaryKey\MutableReverenceKeyInterface;
+use eArc\Data\Entity\Interfaces\ImmutableEntityInterface;
+use eArc\Data\Entity\AbstractEntity;
+use eArc\Data\Entity\GenericMutableEntityReference;
+
+class MyImmutableClassReverencingAImmutable extends AbstractEntity
+{
+    protected string|null $myImmutableLinkPK;
+
+    //...
+    
+    public function getMyImmutable(): MyImmutable|null
+    {
+         return is_null($this->myImmutableLinkPK) ? null : 
+            \data_load(GenericMutableEntityReference::class, $this->myImmutableLinkPK)->getMutableReverenceTarget();
+    }
+    
+    public function setMyImmutable(MyImmutable $immutable)
+    {
+        $this->myImmutableLinkPK = $immutable->getMutableReverenceKey();
+    }
+
+        
+    //...
+}
+
+class MyImmutable extends AbstractEntity implements MutableReverenceKeyInterface, ImmutableEntityInterface
+{
+    protected string $mutableReferencePrimaryKey;
+
+    public function __construct(GenericMutableEntityReference|null $mutableReference)
+    {
+        if (is_null($mutableReference)) {
+            $mutableReference = new GenericMutableEntityReference();            
+        }
+        
+        if (is_null($mutableReference->getPrimaryKey())) {
+            \data_persist($mutableReference);        
+        }
+        
+        $this->mutableReferencePrimaryKey = $mutableReference->getPrimaryKey();
+    }
+    
+    //...
+    
+    public function getMutableReverenceKey(): string
+    {
+        return $this->mutableReferencePrimaryKey;
+    }
+
+    public function getMutableReverenceClass(): string
+    {
+        return GenericMutableEntityReference::class;
+    }
+
+    //...
+}
+```
 
 ### writing your own bridge
+
+If there is no bridge available for your persistence infrastructure, or you need
+maximal control of the persisting process, you can write your own bridge.
 
 For writing a bridge all you have to do is to implement the interfaces
 for the data persist/load/remove/find and primary key generation events.

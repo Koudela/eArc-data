@@ -23,8 +23,10 @@ namespace {
     abstract class BootstrapEArcData
     {
         /**
-         * Registers the functions `data_load`, `data_persist`, `data_delete`,
-         * `data_remove`, `data_schedule`, `data_detach` and `data_find`.
+         * Registers the functions `data_load`, `data_load_stack`, `data_persist`,
+         * `data_persist_stack`, `data_delete`, `data_delete_stack`, `data_remove`,
+         * `data_remove_stack`, `data_schedule`, `data_schedule_stack`, `data_detach`
+         * and `data_find`.
          */
         public static function init(): void
         {
@@ -33,30 +35,60 @@ namespace {
             }
 
             if (!function_exists('data_load')) {
-                function data_load(string $fQCN, string $primaryKey, bool $useDataStoreOnly = false): null|EntityInterface
+                function data_load(string $fQCN, string $primaryKey, bool $useDataStoreOnly = false): mixed
                 {
-                    return di_get(DataStore::class)->load($fQCN, $primaryKey, $useDataStoreOnly);
+                    $result = di_get(DataStore::class)->load($fQCN, [$primaryKey], $useDataStoreOnly);
+
+                    return array_pop($result);
+                }
+            }
+
+            if (!function_exists('data_load_stack')) {
+                function data_load_stack(string $fQCN, array $primaryKeys, bool $useDataStoreOnly = false): array
+                {
+                    return di_get(DataStore::class)->load($fQCN, $primaryKeys, $useDataStoreOnly);
                 }
             }
 
             if (!function_exists('data_persist')) {
-                function data_persist(EntityInterface|null $entity = null): string|null
+                function data_persist(EntityInterface|null $entity = null): void
                 {
-                    return di_get(EntitySaveStack::class)->persist($entity);
+                    di_get(EntitySaveStack::class)->persist(is_null($entity) ? [] : [$entity]);
+                }
+            }
+
+            if (!function_exists('data_persist_stack')) {
+                function data_persist_stack(array $entities): void
+                {
+                    di_get(EntitySaveStack::class)->persist($entities);
                 }
             }
 
             if (!function_exists('data_delete')) {
                 function data_delete(EntityInterface $entity, bool $force = false): void
                 {
-                    di_static(DataStore::class)->delete($entity, $force);
+                    di_static(DataStore::class)->delete([$entity], $force);
+                }
+            }
+
+            if (!function_exists('data_delete_stack')) {
+                function data_delete_stack(array $entities, bool $force = false): void
+                {
+                    di_static(DataStore::class)->delete($entities, $force);
                 }
             }
 
             if (!function_exists('data_remove')) {
                 function data_remove(string $fQCN, string $primaryKey): void
                 {
-                    di_get(DataStore::class)->remove($fQCN, $primaryKey);
+                    di_get(DataStore::class)->remove($fQCN, [$primaryKey]);
+                }
+            }
+
+            if (!function_exists('data_remove_stack')) {
+                function data_remove_stack(string $fQCN, array $primaryKeys): void
+                {
+                    di_get(DataStore::class)->remove($fQCN, $primaryKeys);
                 }
             }
 
@@ -64,6 +96,15 @@ namespace {
                 function data_schedule(EntityInterface $entity): void
                 {
                     di_get(EntitySaveStack::class)->schedule($entity);
+                }
+            }
+
+            if (!function_exists('data_schedule_stack')) {
+                function data_schedule_stack(array $entities): void
+                {
+                    foreach ($entities as $entity) {
+                        di_get(EntitySaveStack::class)->schedule($entity);
+                    }
                 }
             }
 

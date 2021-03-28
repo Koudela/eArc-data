@@ -13,7 +13,7 @@ namespace eArc\Data\Manager\Interfaces\Events;
 interface OnRemoveInterface
 {
     /**
-     * Will be called for removing the entity from the data.
+     * Will be called for removing the data related to the entities.
      *
      * All tagged Services are called. Thus there can be services removing the
      * data from database(s), services removing the data from search indices and
@@ -21,7 +21,7 @@ interface OnRemoveInterface
      * other means.
      *
      * @param string $fQCN
-     * @param string $primaryKey
+     * @param string[] $primaryKeys
      */
-    public function onRemove(string $fQCN, string $primaryKey): void;
+    public function onRemove(string $fQCN, array $primaryKeys): void;
 }

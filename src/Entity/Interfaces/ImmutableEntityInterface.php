@@ -10,10 +10,10 @@
 
 namespace eArc\Data\Entity\Interfaces;
 
-use eArc\Data\Entity\Interfaces\PrimaryKey\PrimaryKeyInterface;
-
 /**
  * Identifies an immutable entity.
+ *
+ * Hint: Take a look at the MutableReverenceKeyInterface.
  */
 interface ImmutableEntityInterface extends EntityInterface
 {
