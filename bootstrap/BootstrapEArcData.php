@@ -26,7 +26,7 @@ namespace {
          * Registers the functions `data_load`, `data_load_stack`, `data_persist`,
          * `data_persist_stack`, `data_delete`, `data_delete_stack`, `data_remove`,
          * `data_remove_stack`, `data_schedule`, `data_schedule_stack`, `data_detach`
-         * and `data_find`.
+         * and `data_find`, `data_find_entities`.
          */
         public static function init(): void
         {
@@ -155,6 +155,13 @@ namespace {
                     }
 
                     throw new QueryException('{fa2b3bb2-c6a9-4117-ae8b-57f9463a3f2d} No Service was found that could respond to the search.');
+                }
+
+                if (!function_exists('data_find_entities')) {
+                    function data_find_entities(string $fQCN, array $keyValuePairs = []): array
+                    {
+                        return data_load_stack($fQCN, data_find($fQCN, $keyValuePairs));
+                    }
                 }
             }
         }

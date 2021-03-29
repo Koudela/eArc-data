@@ -96,7 +96,7 @@ The `data_*` functions need to be imported. Use this in your`index.php`, bootstr
 or configuration script.
 
 ```php
-\BootstrapEArcData::init();
+BootstrapEArcData::init();
 ```
 
 Then register your persistence infrastructure to the `onLoad`, `onSave` and `onRemove` 
@@ -138,16 +138,16 @@ class MyEntity extends AbstractEntity
 
 $entity = new MyEntity('some arguments');
 
-\data_persist($entity); // saves the entity
+data_persist($entity); // saves the entity
 $pk = $entity->getPrimaryKey(); // yields the primary key - may be set prior persistence
-\data_load(MyEntity::class, $pk); // returns the entity of MyEntity::class with the primary key $pk
-\data_delete($entity); // removes the entity
-\data_remove(MyEntity::class, $pk); // removes the entity without the need of being loaded before
-\data_find(MyEntity::class, ['name' => ['Anton', 'Max', 'Simon'], 'age' => 42]); // returns the primary keys for all MyEntity instances where the name property is equal to 'Anton', 'Max' or 'Simon' and the age property is 42
+data_load(MyEntity::class, $pk); // returns the entity of MyEntity::class with the primary key $pk
+data_delete($entity); // removes the entity
+data_remove(MyEntity::class, $pk); // removes the entity without the need of being loaded before
+data_find(MyEntity::class, ['name' => ['Anton', 'Max', 'Simon'], 'age' => 42]); // returns the primary keys for all MyEntity instances where the name property is equal to 'Anton', 'Max' or 'Simon' and the age property is 42
 
 // expert functions - use only if you really know what you are doing
-\data_schedule($entity); // schedules the saving process until `data_persist` is called with any argument
-\data_detach(get_class($entity), $pk); // removes the entity from the earc/data entity cache
+data_schedule($entity); // schedules the saving process until `data_persist` is called with any argument
+data_detach(get_class($entity), $pk); // removes the entity from the earc/data entity cache
 ```
 
 You can call the `data_*` functions from everywhere (i.e. constructors, methods, 
@@ -376,6 +376,9 @@ the used infrastructure, the setting (for example the usable sql indices) and
 the implementation of the bridge. If one or more key value pairs are not supported 
 a `QueryException` is thrown.
 
+Instead of calling `data_load_stack($fQCN, data_load($fQCN, $keyValuePairs)` you
+can use the shorthand `data_find_entities($fQCN, $keyValuePairs)`.
+
 Hint: Beside this function there may be more ways to search for entities. These 
 are not part of the earc/data abstraction.
 
@@ -452,8 +455,8 @@ class MyEntity extends AbstractEntity implements PrePersistInterface
     
     public function prePersist(EntityInterface $entity): void
     {
-        if ($entity = \data_load(MyReverencedEntity::class, $this->myReverencedEntityPK, true)) {
-            \data_persist($entity);        
+        if ($entity = data_load(MyReverencedEntity::class, $this->myReverencedEntityPK, true)) {
+            data_persist($entity);        
         }
     }
 }
@@ -616,7 +619,7 @@ class MyClassReverencingAImmutable extends AbstractEntity implements MutableEnti
     
     public function getMyImmutable(): MyImmutable|null
     {
-         return is_null($this->myImmutablePK) ? null : \data_load(MyImmutable::class, $this->myImmutablePK);
+         return is_null($this->myImmutablePK) ? null : data_load(MyImmutable::class, $this->myImmutablePK);
     }
     
     public function setMyImmutable(MyImmutable $immutable)
@@ -674,7 +677,7 @@ class ReferenceUsingProxy extends AbstractEntity
     
     public function getMyImmutable(): MyImmutable
     {
-        $proxy = \data_load($this->myImmutableProxyFQCN, $this->myImmutableProxyPK)->getMyImmutable();
+        $proxy = data_load($this->myImmutableProxyFQCN, $this->myImmutableProxyPK)->getMyImmutable();
         
         return $proxy->getMyImmutable();
     }
@@ -700,7 +703,7 @@ class MyImmutableClassReverencingAImmutable extends AbstractEntity
     public function getMyImmutable(): MyImmutable|null
     {
          return is_null($this->myImmutableLinkPK) ? null : 
-            \data_load(GenericMutableEntityReference::class, $this->myImmutableLinkPK)->getMutableReverenceTarget();
+            data_load(GenericMutableEntityReference::class, $this->myImmutableLinkPK)->getMutableReverenceTarget();
     }
     
     public function setMyImmutable(MyImmutable $immutable)
@@ -723,7 +726,7 @@ class MyImmutable extends AbstractEntity implements MutableReverenceKeyInterface
         }
         
         if (is_null($mutableReference->getPrimaryKey())) {
-            \data_persist($mutableReference);        
+            data_persist($mutableReference);        
         }
         
         $this->mutableReferencePrimaryKey = $mutableReference->getPrimaryKey();
