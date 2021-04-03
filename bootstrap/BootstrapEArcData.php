@@ -131,7 +131,7 @@ namespace {
                  * These are not part of the earc/data abstraction.
                  *
                  * @param string $fQCN
-                 * @param string[] $keyValuePairs
+                 * @param array $keyValuePairs
                  *
                  * @return string[]
                  *

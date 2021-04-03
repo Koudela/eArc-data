@@ -62,6 +62,7 @@ class DataStore implements DataStoreInterface
         }
 
         $primaryKeysNotLoaded = $primaryKeysToLoad;
+        $postLoadCallables = [];
 
         foreach (di_get_tagged(ParameterInterface::TAG_ON_LOAD) as $service) {
             $service = di_get($service);
@@ -72,7 +73,7 @@ class DataStore implements DataStoreInterface
                 ));
             }
 
-            foreach ($service->onLoad($fQCN, $primaryKeysNotLoaded) as $entity) {
+            foreach ($service->onLoad($fQCN, $primaryKeysNotLoaded, $postLoadCallables) as $entity) {
                 if ($entity instanceof EntityInterface) {
                     $primaryKey = $entity->getPrimaryKey();
                     $entities[$primaryKey] = $entity;
@@ -114,6 +115,10 @@ class DataStore implements DataStoreInterface
             }
 
             $this->entities[$fQCN][$primaryKey] = $entity;
+        }
+
+        foreach ($postLoadCallables as $postLoadCallable) {
+            $postLoadCallable($entities);
         }
 
         return $entities;

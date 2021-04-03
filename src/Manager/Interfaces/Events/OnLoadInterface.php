@@ -21,10 +21,15 @@ interface OnLoadInterface
      * services and callables are skipped. Thus for example if the entity is found
      * in shared memory it does not need to be looked up in the database.
      *
+     * If a service misses an value, it can add a callable to the post load
+     * callables array. These will be called after loading with a an array of all
+     * entities loaded.
+     *
      * @param string $fQCN
      * @param string[] $primaryKeys
+     * @param callable[] $postLoadCallables
      *
      * @return EntityInterface[]
      */
-    public function onLoad(string $fQCN, array $primaryKeys): array;
+    public function onLoad(string $fQCN, array $primaryKeys, array &$postLoadCallables): array;
 }

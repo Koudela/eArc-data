@@ -14,9 +14,9 @@ use eArc\Data\Entity\Interfaces\EntityInterface;
 
 abstract class AbstractEntity implements EntityInterface
 {
-    protected ?string $primaryKey;
+    protected string|null $primaryKey = null;
 
-    public function getPrimaryKey(): ?string
+    public function getPrimaryKey(): string|null
     {
         return $this->primaryKey;
     }

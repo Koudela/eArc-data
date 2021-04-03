@@ -105,14 +105,14 @@ events.
 ```php
 use eArc\Data\ParameterInterface;
 
-di_tag(ParameterInterface::TAG_ON_LOAD, MyMemCacheBridge::class);
+di_tag(ParameterInterface::TAG_ON_LOAD, MyCacheBridge::class);
 di_tag(ParameterInterface::TAG_ON_LOAD, MyDataBaseBridge::class);
 
-di_tag(ParameterInterface::TAG_ON_PERSIST, MyMemCacheBridge::class);
+di_tag(ParameterInterface::TAG_ON_PERSIST, MyCacheBridge::class);
 di_tag(ParameterInterface::TAG_ON_PERSIST, MyDataBaseBridge::class);
 di_tag(ParameterInterface::TAG_ON_PERSIST, MySearchIndexBridge::class);
 
-di_tag(ParameterInterface::TAG_ON_REMOVE, MyMemCacheBridge::class);
+di_tag(ParameterInterface::TAG_ON_REMOVE, MyCacheBridge::class);
 di_tag(ParameterInterface::TAG_ON_REMOVE, MyDataBaseBridge::class);
 di_tag(ParameterInterface::TAG_ON_REMOVE, MySearchIndexBridge::class);
 
@@ -530,6 +530,7 @@ There exist some prebuild bridges:
 - [redis bridge](https://github.com/Koudela/eArc-data-redis) key-value based database server
 - [elasticsearch bridge](https://github.com/Koudela/eArc-data-elasticsearch) search index
 - [filesystem bridge](https://github.com/Koudela/eArc-data-filesystem) filesystem as database or on the fly backup engine
+- [key generator bridge](https://github.com/Koudela/eArc-data-key-keneration) generating uuids and autoincrement ids
 
 #### plug in a bridge
 
@@ -759,28 +760,25 @@ for the data persist/load/remove/find and primary key generation events.
 #### on data persist
 
 The `onPersist()` method of the `OnPersistInterface` will be called with the 
-entity to persist as argument. Persistence must not fail silently.
-
-If you use a key-value store you can use the `SerializerType` and the 
-[earc/serializer](https://github.com/Koudela/eArc-serializer) 
-for proper serialization and deserialization. 
+entities to persist as argument. Persistence must not fail silently.
 
 #### on data load
 
 The `onLoad()` method of the `OnLoadInterface` will be called with fully 
-qualified class name and the primary key of the entity as arguments. It has to 
-return the entity object on success. If the entity could not be found the callable
-must not throw an error, but return null. Other services may return the entity
+qualified class name and the primary keys of the entities as arguments. It has to 
+return the entity objects on success. If the entity could not be found the callable
+must not throw an error, but simply not return it. Other services may return the entity
 object thereafter. 
 
-If you use a key-value store you can use the `SerializerType` and the 
-[earc/serializer](https://github.com/Koudela/eArc-serializer) for proper
-serialization and deserialization. 
+The interface passes as third argument an array of callables. If a service fails
+to load an entity, it can add a callback to the array. The callables will be called
+when all entities are loaded, with the entities as argument. Thus, a cache can save
+missing entities, without the need to listen at every post load event.
 
 #### on data remove
 
 The `onRemove()` method of the `OnReturnInterface` will be called with fully 
-qualified class name and the primary key of the entity as arguments. Removing an 
+qualified class name and the primary keys of the entities as arguments. Removing an 
 entity must not fail silently unless it has not existed yet.
 
 #### on data find
@@ -802,6 +800,8 @@ interpreted as `IN`.
 
 For example `callable(User::class, ['firstname' => 'Max', 'age' => [18, 19, 20, 21, 22, 23])`
 has to return all users with first name Max and age between 18 and 23.
+
+Bridges may extend this syntax to support a wider range of search requests.
 
 #### on primary key generation
 
