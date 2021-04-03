@@ -530,7 +530,7 @@ There exist some prebuild bridges:
 - [redis bridge](https://github.com/Koudela/eArc-data-redis) key-value based database server used for caching
 - [elasticsearch bridge](https://github.com/Koudela/eArc-data-elasticsearch) search index
 - [filesystem bridge](https://github.com/Koudela/eArc-data-filesystem) filesystem as database or on the fly backup engine
-- [key generator bridge](https://github.com/Koudela/eArc-data-key-keneration) generating uuids and autoincrement ids
+- [key generator bridge](https://github.com/Koudela/eArc-data-primary-key-generator) generating uuids and autoincrement ids
 
 #### plug in a bridge
 

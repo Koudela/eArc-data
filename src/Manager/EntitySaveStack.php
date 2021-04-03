@@ -54,7 +54,7 @@ class EntitySaveStack implements EntitySaveStackInterface
     protected function save(array $entities): void
     {
         foreach ($entities as $entity) {
-            foreach (di_get_tagged(ParameterInterface::TAG_PRE_PERSIST) as $service) {
+            foreach (di_get_tagged(ParameterInterface::TAG_PRE_PERSIST) as $service => $args) {
                 $service = di_get($service);
                 if (!$service instanceof PrePersistInterface) {
                     throw new DataException(sprintf(
@@ -93,7 +93,7 @@ class EntitySaveStack implements EntitySaveStackInterface
             }
         }
 
-        foreach (di_get_tagged(ParameterInterface::TAG_ON_PERSIST) as $service) {
+        foreach (di_get_tagged(ParameterInterface::TAG_ON_PERSIST) as $service => $args) {
             $service = di_get($service);
             if (!$service instanceof OnPersistInterface) {
                 throw new DataException(sprintf(
@@ -116,7 +116,7 @@ class EntitySaveStack implements EntitySaveStackInterface
                 $this->processMutableReverenceKeyInterface($entity);
             }
 
-            foreach (di_get_tagged(ParameterInterface::TAG_POST_PERSIST) as $service) {
+            foreach (di_get_tagged(ParameterInterface::TAG_POST_PERSIST) as $service => $args) {
                 $service = di_get($service);
                 if (!$service instanceof PostPersistInterface) {
                     throw new DataException(sprintf(
@@ -137,7 +137,7 @@ class EntitySaveStack implements EntitySaveStackInterface
     protected function generatePrimaryKey(EntityInterface $entity): void
     {
         if ($entity instanceof AutoPrimaryKeyInterface) {
-            foreach (di_get_tagged(ParameterInterface::TAG_ON_AUTO_PRIMARY_KEY) as $service) {
+            foreach (di_get_tagged(ParameterInterface::TAG_ON_AUTO_PRIMARY_KEY) as $service => $args) {
                 $service = di_get($service);
                 if (!$service instanceof OnAutoPrimaryKeyInterface) {
                     throw new DataException(sprintf(

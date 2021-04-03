@@ -43,7 +43,7 @@ class DataStore implements DataStoreInterface
 
                 $primaryKeysToLoad[$primaryKey] = $primaryKey;
 
-                foreach (di_get_tagged(ParameterInterface::TAG_PRE_LOAD) as $service) {
+                foreach (di_get_tagged(ParameterInterface::TAG_PRE_LOAD) as $service => $args) {
                     $service = di_static($service);
                     if (!$service instanceof PreLoadInterface) {
                         throw new DataException(sprintf(
@@ -64,7 +64,7 @@ class DataStore implements DataStoreInterface
         $primaryKeysNotLoaded = $primaryKeysToLoad;
         $postLoadCallables = [];
 
-        foreach (di_get_tagged(ParameterInterface::TAG_ON_LOAD) as $service) {
+        foreach (di_get_tagged(ParameterInterface::TAG_ON_LOAD) as $service => $args) {
             $service = di_get($service);
             if (!$service instanceof OnLoadInterface) {
                 throw new DataException(sprintf(
@@ -98,7 +98,7 @@ class DataStore implements DataStoreInterface
         foreach ($primaryKeysToLoad as $primaryKey) {
             $entity = $entities[$primaryKey];
 
-            foreach (di_get_tagged(ParameterInterface::TAG_POST_LOAD) as $service) {
+            foreach (di_get_tagged(ParameterInterface::TAG_POST_LOAD) as $service => $args) {
                 $service = di_get($service);
                 if (!$service instanceof PostLoadInterface) {
                     throw new DataException(sprintf(
@@ -170,7 +170,7 @@ class DataStore implements DataStoreInterface
         }
 
         foreach ($primaryKeys as $primaryKey) {
-            foreach (di_get_tagged(ParameterInterface::TAG_PRE_REMOVE) as $service) {
+            foreach (di_get_tagged(ParameterInterface::TAG_PRE_REMOVE) as $service => $args) {
                 $service = di_static($service);
                 if (!$service instanceof PreRemoveInterface) {
                     throw new DataException(sprintf(
@@ -187,7 +187,7 @@ class DataStore implements DataStoreInterface
             }
         }
 
-        foreach (di_get_tagged(ParameterInterface::TAG_ON_REMOVE) as $service) {
+        foreach (di_get_tagged(ParameterInterface::TAG_ON_REMOVE) as $service => $args) {
             $service = di_get($service);
             if (!$service instanceof OnRemoveInterface) {
                 throw new DataException(sprintf(
@@ -201,7 +201,7 @@ class DataStore implements DataStoreInterface
         foreach ($primaryKeys as $primaryKey) {
             unset($this->entities[$fQCN][$primaryKey]);
 
-            foreach (di_get_tagged(ParameterInterface::TAG_POST_REMOVE) as $service) {
+            foreach (di_get_tagged(ParameterInterface::TAG_POST_REMOVE) as $service => $args) {
                 $service = di_static($service);
                 if (!$service instanceof PostRemoveInterface) {
                     throw new DataException(sprintf(

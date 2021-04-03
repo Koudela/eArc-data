@@ -139,7 +139,7 @@ namespace {
                  */
                 function data_find(string $fQCN, array $keyValuePairs = []): array
                 {
-                    foreach (di_get_tagged(ParameterInterface::TAG_ON_FIND) as $service) {
+                    foreach (di_get_tagged(ParameterInterface::TAG_ON_FIND) as $service => $args) {
                         $service = di_get($service);
                         if (!$service instanceof OnFindInterface) {
                             throw new DataException(sprintf(
