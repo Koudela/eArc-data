@@ -12,7 +12,6 @@ namespace eArc\Data\Manager\Interfaces;
 
 use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Exceptions\Interfaces\NoDataExceptionInterface;
-use eArc\Serializer\Exceptions\Interfaces\SerializeExceptionInterface;
 
 interface DataStoreInterface
 {
@@ -27,7 +26,7 @@ interface DataStoreInterface
      *
      * @return EntityInterface[]
      *
-     * @throws NoDataExceptionInterface|SerializeExceptionInterface
+     * @throws NoDataExceptionInterface
      */
     public function load(string $fQCN, array $primaryKeys, bool $useDataStoreOnly = false): array;
 

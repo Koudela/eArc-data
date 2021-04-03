@@ -14,8 +14,7 @@
     "prefer-stable" : true,
     "require": {
         "php": "^8.0",
-        "earc/di": "3.0",
-        "earc/serializer": "^1.1"
+        "earc/di": "^3.0"
     },
     "autoload": {
         "psr-4" : {
