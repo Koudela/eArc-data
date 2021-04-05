@@ -45,20 +45,25 @@ class DataStore implements DataStoreInterface
 
                 foreach (di_get_tagged(ParameterInterface::TAG_PRE_LOAD) as $service => $args) {
                     $service = di_static($service);
-                    if (!$service instanceof PreLoadInterface) {
+                    if (!is_subclass_of($service, PreLoadInterface::class)) {
                         throw new DataException(sprintf(
-                            '{4c316e5c-d82d-4562-9eca-c029a2ed44fe} Services tagged by the %s have to implement it.',
+                            '{4c316e5c-d82d-4562-9eca-c029a2ed44fe} Service %s tagged by the interface %s has to implement it.',
+                            $service,
                             PreLoadInterface::class
                         ));
                     }
                     $service::preLoad($fQCN, $primaryKey);
                 }
 
-                if ($fQCN instanceof PreLoadInterface) {
+                if (is_subclass_of($fQCN, PreLoadInterface::class)) {
                     /** @var $fQCN string|PreLoadInterface */
                     $fQCN::preLoad($fQCN, $primaryKey);
                 }
             }
+        }
+
+        if (empty($primaryKeysToLoad)) {
+            return $entities;
         }
 
         $primaryKeysNotLoaded = $primaryKeysToLoad;
@@ -68,7 +73,8 @@ class DataStore implements DataStoreInterface
             $service = di_get($service);
             if (!$service instanceof OnLoadInterface) {
                 throw new DataException(sprintf(
-                    '{c3680a93-cc0e-47d4-8d87-573398fcbc0d} Services tagged by the %s have to implement it.',
+                    '{c3680a93-cc0e-47d4-8d87-573398fcbc0d} Service %s tagged by the interface %s has to implement it.',
+                    $service,
                     OnLoadInterface::class
                 ));
             }
@@ -102,7 +108,8 @@ class DataStore implements DataStoreInterface
                 $service = di_get($service);
                 if (!$service instanceof PostLoadInterface) {
                     throw new DataException(sprintf(
-                        '{44655d29-29aa-4e15-8807-353b49495573} Services tagged by the %s have to implement it.',
+                        '{44655d29-29aa-4e15-8807-353b49495573} Service %s tagged by the interface %s has to implement it.',
+                        $service,
                         PostLoadInterface::class
                     ));
                 }
@@ -127,6 +134,11 @@ class DataStore implements DataStoreInterface
     public function isLoaded(string $fQCN, string $primaryKey): bool
     {
         return isset($this->entities[$fQCN][$primaryKey]);
+    }
+
+    public function attach(EntityInterface $entity): void
+    {
+        $this->entities[$entity::class][$entity->getPrimaryKey()] = $entity;
     }
 
     public function detach(string|null $fQCN = null, array|null $primaryKeys = null): void
@@ -163,7 +175,7 @@ class DataStore implements DataStoreInterface
 
     public function remove(string $fQCN, array $primaryKeys, bool $force = false): void
     {
-        if (!$force && $fQCN instanceof ImmutableEntityInterface) {
+        if (!$force && is_subclass_of($fQCN, ImmutableEntityInterface::class)) {
             throw new DataException(
                 '{2055c126-1148-4c8b-ab1e-e607e9e919d4} The force flag has to been set in order to remove the data of an immutable entity.'
             );
@@ -172,16 +184,17 @@ class DataStore implements DataStoreInterface
         foreach ($primaryKeys as $primaryKey) {
             foreach (di_get_tagged(ParameterInterface::TAG_PRE_REMOVE) as $service => $args) {
                 $service = di_static($service);
-                if (!$service instanceof PreRemoveInterface) {
+                if (!is_subclass_of($service, PreRemoveInterface::class)) {
                     throw new DataException(sprintf(
-                        '{19afae2d-5f2e-4308-9182-2e817f8c6349} Services tagged by the %s have to implement it.',
+                        '{19afae2d-5f2e-4308-9182-2e817f8c6349} Service %s tagged by the interface %s has to implement it.',
+                        $service,
                         PreRemoveInterface::class
                     ));
                 }
                 $service::preRemove($fQCN, $primaryKey);
             }
 
-            if ($fQCN instanceof PreRemoveInterface) {
+            if (is_subclass_of($fQCN, PreRemoveInterface::class)) {
                 /** @var $fQCN string|PreRemoveInterface */
                 $fQCN::preRemove($fQCN, $primaryKey);
             }
@@ -191,7 +204,8 @@ class DataStore implements DataStoreInterface
             $service = di_get($service);
             if (!$service instanceof OnRemoveInterface) {
                 throw new DataException(sprintf(
-                    '{c2275908-ae39-4114-b391-c0c20a5f91c8} Services tagged by the %s have to implement it.',
+                    '{c2275908-ae39-4114-b391-c0c20a5f91c8} Service %s tagged by the interface %s has to implement it.',
+                    $service,
                     OnRemoveInterface::class
                 ));
             }
@@ -203,16 +217,17 @@ class DataStore implements DataStoreInterface
 
             foreach (di_get_tagged(ParameterInterface::TAG_POST_REMOVE) as $service => $args) {
                 $service = di_static($service);
-                if (!$service instanceof PostRemoveInterface) {
+                if (!is_subclass_of($service, PostRemoveInterface::class)) {
                     throw new DataException(sprintf(
-                        '{174e73d8-efd9-475f-85d2-b1bfe3d4d008} Services tagged by the %s have to implement it.',
+                        '{174e73d8-efd9-475f-85d2-b1bfe3d4d008} Service %s tagged by the interface %s has to implement it.',
+                        $service,
                         PostRemoveInterface::class
                     ));
                 }
                 $service::postRemove($fQCN, $primaryKey);
             }
 
-            if ($fQCN instanceof PostRemoveInterface) {
+            if (is_subclass_of($fQCN, PostRemoveInterface::class)) {
                 /** @var string|PostRemoveInterface $fQCN */
                 $fQCN::postRemove($fQCN, $primaryKey);
             }

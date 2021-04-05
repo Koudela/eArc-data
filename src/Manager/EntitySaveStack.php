@@ -58,7 +58,8 @@ class EntitySaveStack implements EntitySaveStackInterface
                 $service = di_get($service);
                 if (!$service instanceof PrePersistInterface) {
                     throw new DataException(sprintf(
-                        '{2da5c06b-62fd-4118-8b9c-f95ef379b024} Services tagged by the %s have to implement it.',
+                        '{2da5c06b-62fd-4118-8b9c-f95ef379b024} Service %s tagged by the interface %s has to implement it.',
+                        $service,
                         PrePersistInterface::class
                     ));
                 }
@@ -74,6 +75,7 @@ class EntitySaveStack implements EntitySaveStackInterface
                 try {
                     data_load(get_class($entity), $entity->getPrimaryKey());
                     if ($entity instanceof AutoPrimaryKeyInterface) {
+                        data_detach($entity::class, [$entity->getPrimaryKey()]);
                         $entity->setPrimaryKey(null);
                     } else {
                         throw new DataException(sprintf(
@@ -97,7 +99,8 @@ class EntitySaveStack implements EntitySaveStackInterface
             $service = di_get($service);
             if (!$service instanceof OnPersistInterface) {
                 throw new DataException(sprintf(
-                    '{f88ee6b9-4314-4efe-887a-d930c46d30c4} Services tagged by the %s have to implement it.',
+                    '{f88ee6b9-4314-4efe-887a-d930c46d30c4} Service %s tagged by the interface %s has to implement it.',
+                    $service,
                     OnPersistInterface::class
                 ));
             }
@@ -110,7 +113,7 @@ class EntitySaveStack implements EntitySaveStackInterface
                     '{4be1fe92-0afe-4a2f-8d6c-549fc30e24d0} The entity has no primary key and was probably not saved.'
                 ));
             }
-            $this->entitySaveStack[$entity::class][$entity->getPrimaryKey()] = $entity;
+            di_get(DataStore::class)->attach($entity);
 
             if ($entity instanceof MutableReverenceKeyInterface) {
                 $this->processMutableReverenceKeyInterface($entity);
@@ -120,7 +123,8 @@ class EntitySaveStack implements EntitySaveStackInterface
                 $service = di_get($service);
                 if (!$service instanceof PostPersistInterface) {
                     throw new DataException(sprintf(
-                        '{2651f432-fa70-4d1f-85ce-416afaf7b296} Services tagged by the %s have to implement it.',
+                        '{2651f432-fa70-4d1f-85ce-416afaf7b296} Service %s tagged by the interface %s has to implement it.',
+                        $service,
                         PostPersistInterface::class
                     ));
                 }
@@ -141,12 +145,16 @@ class EntitySaveStack implements EntitySaveStackInterface
                 $service = di_get($service);
                 if (!$service instanceof OnAutoPrimaryKeyInterface) {
                     throw new DataException(sprintf(
-                        '{ac171999-74a1-43b4-a1b1-a6a47cc7a2cb} Services tagged by the %s have to implement it.',
+                        '{ac171999-74a1-43b4-a1b1-a6a47cc7a2cb} Service %s tagged by the interface %s has to implement it.',
+                        $service,
                         OnAutoPrimaryKeyInterface::class
                     ));
                 }
                 $primaryKey = $service->onAutoPrimaryKey($entity);
                 if (!is_null($primaryKey)) {
+                    if (!is_null($entity->getPrimaryKey())) {
+                        data_detach($entity::class, [$entity->getPrimaryKey()]);
+                    }
                     $entity->setPrimaryKey($primaryKey);
 
                     break;

@@ -42,6 +42,13 @@ interface DataStoreInterface
     public function isLoaded(string $fQCN, string $primaryKey): bool;
 
     /**
+     * Adds an entity to the data store.
+     *
+     * @param EntityInterface $entity
+     */
+    public function attach(EntityInterface $entity): void;
+
+    /**
      * Clears the entity from the data store cache for the `load` and `isLoaded` methods.
      *
      * @param string|null $fQCN

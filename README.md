@@ -66,7 +66,7 @@ if you need more control).
 - **use of global functions** - once initialized there is no need to inject a
 repository or a manager in any class.
 - **use it everywhere** - saving and loading data works even in vanilla functions 
-and closures.  
+and closures.
 - **architectural optimized code** - processing works in linear time to the size 
 and count of your entities. No headache about an entity manager slowing down after
 persisting a couple of entities.
@@ -96,7 +96,9 @@ The `data_*` functions need to be imported. Use this in your`index.php`, bootstr
 or configuration script.
 
 ```php
-BootstrapEArcData::init();
+use eArc\Data\Initializer;
+
+Initializer::init();
 ```
 
 Then register your persistence infrastructure to the `onLoad`, `onSave` and `onRemove` 
@@ -125,17 +127,6 @@ di_tag(ParameterInterface::TAG_ON_AUTO_PRIMARY_KEY, MyDataBaseBridge::class);
 After that entities can be loaded and saved via the `data_*` functions.
 
 ```php
-use eArc\Data\Entity\AbstractEntity;
-
-class MyEntity extends AbstractEntity
-{
-    public function __construct(...$args)
-    {
-        //... some construction logic
-    }
-    //... all the other entity logic
-}
-
 $entity = new MyEntity('some arguments');
 
 data_persist($entity); // saves the entity
@@ -147,7 +138,7 @@ data_find(MyEntity::class, ['name' => ['Anton', 'Max', 'Simon'], 'age' => 42]); 
 
 // expert functions - use only if you really know what you are doing
 data_schedule($entity); // schedules the saving process until `data_persist` is called with any argument
-data_detach(get_class($entity), $pk); // removes the entity from the earc/data entity cache
+data_detach(get_class($entity), [$pk]); // removes the entity from the earc/data entity cache
 ```
 
 You can call the `data_*` functions from everywhere (i.e. constructors, methods, 
@@ -191,7 +182,7 @@ class Entity extends AbstractEntity
 ```
 
 This gives the advantage, that reverences between entities does not need to be 
-managed by earc/data, and your reverenced entity are lazy loaded. Both saves a 
+managed by earc/data, and your reverenced entity is lazy loaded. Both saves a 
 lot of overhead and gives you more control without doing much more programming.
 
 #### collections
@@ -206,7 +197,7 @@ use eArc\Data\Entity\AbstractEntity;
 
 class MyReverencedEntity extends AbstractEntity {/*...*/}
 
-class Entity extends AbstractEntity
+class EntityWithCollection extends AbstractEntity
 {
     protected Collection $myReverencedEntityCollection;
     
@@ -219,6 +210,18 @@ class Entity extends AbstractEntity
     {
         return $this->myReverencedEntityCollection;
     }
+}
+
+$entityWithCollection = new EntityWithCollection();
+$myReverencedEntity = new MyReverencedEntity();
+$collection = $entityWithCollection->getMyReverencedEntityCollection();
+$collection->add($myReverencedEntity->getPrimaryKey());
+$collection->remove($myReverencedEntity->getPrimaryKey());
+foreach ($collection as $primaryKey) {
+    echo $primaryKey;
+}
+foreach ($collection->asArray() as $entity) {
+    echo $entity->getPrimaryKey();
 }
 ```
 
@@ -297,10 +300,22 @@ class MyRootEntity extends AbstractEntity
         $this->myEmbeddedEntityCollection = new EmbeddedCollection($this, MyEmbeddedEntity::class);
     }
     
-    public function getMyReverencedEntityCollection(): EmbeddedCollection
+    public function getMyEmbeddedEntityCollection(): EmbeddedCollection
     {
         return $this->myEmbeddedEntityCollection;
     }
+}
+
+$rootEntity = new MyRootEntity();
+$myEmbeddedEntity = new MyEmbeddedEntity();
+$collection = $rootEntity->getMyEmbeddedEntityCollection();
+$collection->add($myEmbeddedEntity);
+$collection->remove($myEmbeddedEntity);
+foreach ($collection as $entity) {
+    echo $entity::class;
+}
+foreach ($collection->asArray() as $entity) {
+    echo $entity::class;
 }
 ```
 
@@ -309,6 +324,20 @@ Embedded collections consist always of one type of entities.
 Hint: If you extend the type of the entities used by your collection, you can add
 instances of this to the collection and this time earc/data guarantees that the 
 additional data is saved.
+
+Embedded collections expose a `findBy()` method to search the collection in a 
+key value based fashion.
+
+```php
+$rootEntity = new MyRootEntity();
+$collection = $rootEntity->getMyEmbeddedEntityCollection();
+$entities = $collection->findBy(['name' => 'Claudia', 'age' => [31,32,33]]);
+foreach ($entities as $entity) {
+    echo $entity::class === MyEmbeddedEntity::class
+        && $entity->getName() === 'Claudia'
+        && in_array($entity->getAge(), [31, 32, 33]) ? 'true' : 'something went wrong';
+}
+```
 
 Hint: If you reverence an object by a property of an entity that is no embedded
 entity and not an embedded collection earc/data neither guarantees that the data
@@ -331,7 +360,7 @@ On calling `data_persist` all entities scheduled via `data_schedule` will be sav
 first. `data_persist` can be called without argument, to trigger the saving of the
 scheduled entities without the need to explicit save any entity. 
 
-To save multiple entities there is a `data_persist_stack` function.
+To save multiple entities there is a `data_persist_batch` function.
 
 #### data load
 
@@ -345,7 +374,7 @@ You can change this behaviour by calling `data_detach` in between. Please note t
 resulting behaviour might be unexpected for inattentive developers. Use with great
 care.
 
-There is a `data_load_stack` function to load multiple entities at once.
+There is a `data_load_batch` function to load multiple entities at once.
 
 #### data delete
 
@@ -354,14 +383,14 @@ There is a `data_load_stack` function to load multiple entities at once.
 Entities implementing the `ImmutableEntityInterface` can only be deleted if the
 force flag has been set.
 
-This function has a multiple counterpart `data_delete_stack`.
+This function has a multiple counterpart `data_delete_batch`.
 
 #### data remove
 
 `data_remove` takes the entity class name and primary key as arguments. It works
 as `data_delete` but without the need of the entity being loaded prior removal.
 
-To delete multiple entities of the same class use the `data_remove_stack` function.
+To delete multiple entities of the same class use the `data_remove_batch` function.
 
 #### data find
 
@@ -376,7 +405,7 @@ the used infrastructure, the setting (for example the usable sql indices) and
 the implementation of the bridge. If one or more key value pairs are not supported 
 a `QueryException` is thrown.
 
-Instead of calling `data_load_stack($fQCN, data_load($fQCN, $keyValuePairs)` you
+Instead of calling `data_load_batch($fQCN, data_load($fQCN, $keyValuePairs)` you
 can use the shorthand `data_find_entities($fQCN, $keyValuePairs)`.
 
 Hint: Beside this function there may be more ways to search for entities. These 
@@ -439,7 +468,7 @@ use \eArc\Data\Entity\Interfaces\Events\PrePersistInterface;
 
 class MyReverencedEntity extends AbstractEntity {/*...*/}
 
-class MyEntity extends AbstractEntity implements PrePersistInterface
+class SomeEntity extends AbstractEntity implements PrePersistInterface
 {
     protected string $myReverencedEntityPK;
     
@@ -474,7 +503,7 @@ or your application is slowed down unnecessarily.
 ```php
 use eArc\Data\Entity\Interfaces\Events\PreRemoveInterface;
 
-\di_tag(PreRemoveInterface::class, MyPreRemoveService::class); // <- this comes in your bootstrap section
+di_tag(PreRemoveInterface::class, MyPreRemoveService::class); // <- this comes in your bootstrap section
 
 
 class MyPreRemoveService implements PreRemoveInterface 
@@ -532,9 +561,13 @@ There exist some prebuild bridges:
 - [filesystem bridge](https://github.com/Koudela/eArc-data-filesystem) filesystem as database or on the fly backup engine
 - [key generator bridge](https://github.com/Koudela/eArc-data-primary-key-generator) generating uuids and autoincrement ids
 
+- [default setup bridge](https://github.com/Koudela/eArc-data-default-setup) use 
+  filesystem (storage), redis (cache), elasticsearch (search) and key generator 
+  bridge in a ready to use setup.
+
 #### plug in a bridge
 
-To activate this bridge you have to tag the interfaces.
+To activate a bridge you have to tag the interfaces.
 
 ```php
 use eArc\Data\ParameterInterface;
@@ -562,7 +595,9 @@ DI::init();
 You can skip initializing earc/di, if you initialize earc/data first.
 
 ```php
-BootstrapEArcData::init();
+use eArc\Data\Initializer;
+
+Initializer::init();
 ```
 
 This will init earc/di as well.
@@ -718,7 +753,7 @@ class MyImmutableClassReverencingAImmutable extends AbstractEntity
 
 class MyImmutable extends AbstractEntity implements MutableReverenceKeyInterface, ImmutableEntityInterface
 {
-    protected string $mutableReferencePrimaryKey;
+    protected string|null $mutableReferencePrimaryKey;
 
     public function __construct(GenericMutableEntityReference|null $mutableReference)
     {
@@ -821,4 +856,4 @@ string. Of course this must be recognised by the on data persist services.
 * the first official release
 * PHP ^8.0 support
 * IDE support for PHPStorm:
-    - return type support for `data_load`
+    - return type support for `data_load`, `data_load_batch` and `data_find_entities`

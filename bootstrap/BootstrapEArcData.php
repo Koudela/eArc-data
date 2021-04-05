@@ -23,9 +23,9 @@ namespace {
     abstract class BootstrapEArcData
     {
         /**
-         * Registers the functions `data_load`, `data_load_stack`, `data_persist`,
-         * `data_persist_stack`, `data_delete`, `data_delete_stack`, `data_remove`,
-         * `data_remove_stack`, `data_schedule`, `data_schedule_stack`, `data_detach`
+         * Registers the functions `data_load`, `data_load_batch`, `data_persist`,
+         * `data_persist_batch`, `data_delete`, `data_delete_batch`, `data_remove`,
+         * `data_remove_batch`, `data_schedule`, `data_schedule_batch`, `data_detach`
          * and `data_find`, `data_find_entities`.
          */
         public static function init(): void
@@ -43,8 +43,8 @@ namespace {
                 }
             }
 
-            if (!function_exists('data_load_stack')) {
-                function data_load_stack(string $fQCN, array $primaryKeys, bool $useDataStoreOnly = false): array
+            if (!function_exists('data_load_batch')) {
+                function data_load_batch(string $fQCN, array $primaryKeys, bool $useDataStoreOnly = false): array
                 {
                     return di_get(DataStore::class)->load($fQCN, $primaryKeys, $useDataStoreOnly);
                 }
@@ -57,8 +57,8 @@ namespace {
                 }
             }
 
-            if (!function_exists('data_persist_stack')) {
-                function data_persist_stack(array $entities): void
+            if (!function_exists('data_persist_batch')) {
+                function data_persist_batch(array $entities): void
                 {
                     di_get(EntitySaveStack::class)->persist($entities);
                 }
@@ -67,14 +67,14 @@ namespace {
             if (!function_exists('data_delete')) {
                 function data_delete(EntityInterface $entity, bool $force = false): void
                 {
-                    di_static(DataStore::class)->delete([$entity], $force);
+                    di_get(DataStore::class)->delete([$entity], $force);
                 }
             }
 
-            if (!function_exists('data_delete_stack')) {
-                function data_delete_stack(array $entities, bool $force = false): void
+            if (!function_exists('data_delete_batch')) {
+                function data_delete_batch(array $entities, bool $force = false): void
                 {
-                    di_static(DataStore::class)->delete($entities, $force);
+                    di_get(DataStore::class)->delete($entities, $force);
                 }
             }
 
@@ -85,8 +85,8 @@ namespace {
                 }
             }
 
-            if (!function_exists('data_remove_stack')) {
-                function data_remove_stack(string $fQCN, array $primaryKeys): void
+            if (!function_exists('data_remove_batch')) {
+                function data_remove_batch(string $fQCN, array $primaryKeys): void
                 {
                     di_get(DataStore::class)->remove($fQCN, $primaryKeys);
                 }
@@ -99,8 +99,8 @@ namespace {
                 }
             }
 
-            if (!function_exists('data_schedule_stack')) {
-                function data_schedule_stack(array $entities): void
+            if (!function_exists('data_schedule_batch')) {
+                function data_schedule_batch(array $entities): void
                 {
                     foreach ($entities as $entity) {
                         di_get(EntitySaveStack::class)->schedule($entity);
@@ -117,19 +117,6 @@ namespace {
 
             if (!function_exists('data_find')) {
                 /**
-                 * Returns the primary keys for the key value pairs based on the
-                 * properties of the entities from the class. If the key value
-                 * pairs are empty all primary keys are returned. Key value pairs
-                 * are joint via logic `AND`. Value arrays are interpreted as `IN`.
-                 * Not all key value pairs or value arrays may be supported. It
-                 * depends on the used infrastructure, the setting (for example
-                 * the usable sql indices) and the implementation of the bridge.
-                 * If one or more key value pairs are not supported a query
-                 * exception is thrown.
-                 *
-                 * Beside this function there may be more ways to search for entities.
-                 * These are not part of the earc/data abstraction.
-                 *
                  * @param string $fQCN
                  * @param array $keyValuePairs
                  *
@@ -143,7 +130,8 @@ namespace {
                         $service = di_get($service);
                         if (!$service instanceof OnFindInterface) {
                             throw new DataException(sprintf(
-                                '{18360d2b-e609-43f3-b08a-927347df7de8} Services tagged by the %s have to implement it.',
+                                '{18360d2b-e609-43f3-b08a-927347df7de8} Service %s tagged by the interface %s has to implement it.',
+                                $service,
                                 OnFindInterface::class
                             ));
                         }
@@ -160,7 +148,7 @@ namespace {
                 if (!function_exists('data_find_entities')) {
                     function data_find_entities(string $fQCN, array $keyValuePairs = []): array
                     {
-                        return data_load_stack($fQCN, data_find($fQCN, $keyValuePairs));
+                        return data_load_batch($fQCN, data_find($fQCN, $keyValuePairs));
                     }
                 }
             }
