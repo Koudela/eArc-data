@@ -3,7 +3,7 @@
     "description": "eArc - the explicit architecture framework - data component",
     "type": "library",
     "license": "MIT",
-    "version": "dev-0.0",
+    "version": "0.0",
     "authors": [
         {
             "name": "Thomas Koudela",

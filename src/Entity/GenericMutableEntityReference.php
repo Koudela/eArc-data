@@ -17,7 +17,7 @@ use function data_load;
 
 class GenericMutableEntityReference implements MutableEntityReferenceInterface, AutoPrimaryKeyInterface
 {
-    protected string|null $primaryKey;
+    protected string|null $primaryKey = null;
     protected string|null $mutableReverenceKeyEntityPK;
     protected string|null $mutableReverenceKeyEntityFQCN;
 

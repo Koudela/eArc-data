@@ -18,6 +18,7 @@ namespace {
     use eArc\Data\Manager\Interfaces\Events\OnRemoveInterface;
     use eArc\DataTests\env\Counter;
     use eArc\DataTests\env\EmptyEntity;
+    use eArc\DataTests\env\ImmutableEntity;
 
     class MyDatabaseBridge implements OnLoadInterface, OnPersistInterface, OnRemoveInterface, OnFindInterface, OnAutoPrimaryKeyInterface
     {
@@ -36,7 +37,13 @@ namespace {
                 $this->postLoadCallablesCalledCorrectly = (++Counter::$cnt);
             };
 
-            return [0 => new MyEntity(array_values($primaryKeys)[0])];
+            if ($fQCN === MyEntity::class) {
+                return [0 => new MyEntity(array_values($primaryKeys)[0])];
+            } elseif (array_key_exists('pk-already-persisted', $primaryKeys)) {
+                return [0 => new ImmutableEntity(array_values($primaryKeys)[0])];
+            } else {
+                return [];
+            }
         }
 
         public function onPersist(array $entities): void

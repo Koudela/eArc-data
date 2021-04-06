@@ -10,13 +10,24 @@
 
 namespace eArc\DataTests;
 
+use eArc\Data\Entity\GenericMutableEntityReference;
+use eArc\Data\Exceptions\DataException;
 use eArc\Data\Initializer;
+use eArc\Data\Manager\DataStore;
 use eArc\Data\ParameterInterface;
 use eArc\DataTests\env\Counter;
+use eArc\DataTests\env\ImmutableAutoPrimaryKeyEntity;
+use eArc\DataTests\env\ImmutableEntity;
+use eArc\DataTests\env\ImmutableProxy;
+use eArc\DataTests\env\ReverencedByGenericImmutableEntity;
+use eArc\DataTests\env\ReverencedImmutableEntity;
 use eArc\DataTests\env\TaggedService;
+use Exception;
 use MyCacheBridge;
 use MyDataBaseBridge;
+use MyEmbeddedEntity;
 use MyEntity;
+use MyRootEntity;
 use MySearchIndexBridge;
 use PHPUnit\Framework\TestCase;
 
@@ -204,11 +215,113 @@ class TestDataManager extends TestCase
 
     public function testFindInEmbeddedCollections(): void
     {
-        #TODO
+        $this->init();
+
+        $entity = new MyRootEntity();
+        $collection = $entity->getMyEmbeddedEntityCollection();
+        $collection->add(new MyEmbeddedEntity('Max', 'Berlin', 42));
+        $collection->add(new MyEmbeddedEntity('Moritz', 'London', 23));
+        $collection->add(new MyEmbeddedEntity('Silvana', 'Madrid', 32));
+        $collection->add(new MyEmbeddedEntity('Max', 'Budapest', 55));
+        $collection->add(new MyEmbeddedEntity('Toni', 'London', 47));
+
+        $cnt = 0;
+        foreach ($collection->findBy(['name' => ['Max', 'Moritz']]) as $item) {
+            $cnt++;
+            self::assertTrue($item->getName() === 'Max' || $item->getName() === 'Moritz');
+        }
+        self::assertEquals(3, $cnt);
+
+        $cnt = 0;
+        foreach ($collection->findBy(['city' => ['London'], 'age' => [21, 22, 23]]) as $item) {
+            $cnt++;
+            self::assertTrue($item->getCity() === 'London' && $item->getAge() === 23);
+        }
+        self::assertEquals(1, $cnt);
+
+        $cnt = 0;
+        foreach ($collection->findBy(['name' => ['Max', 'Moritz'], 'city' => ['London'], 'age' => [50]]) as $item) {
+            $cnt++;
+            self::assertTrue($item instanceof MyEmbeddedEntity);
+        }
+        self::assertEquals(0, $cnt);
     }
 
     public function testImmutables(): void
     {
-        #TODO
+        $this->init();
+
+        $immutable = new ImmutableEntity('pk-not-persisted');
+        try {
+            data_persist($immutable);
+            $exception = null;
+        } catch (Exception $exception) {
+        } finally {
+            self::assertNull($exception);
+        }
+
+        $immutable = new ImmutableEntity('pk-already-persisted');
+        try {
+            data_persist($immutable);
+            $exception = null;
+        } catch (Exception $exception) {
+        } finally {
+            self::assertTrue($exception instanceof DataException);
+            self::assertTrue(str_contains($exception->getMessage(), '{d98eb0dc-9cb1-490f-807d-e5089ee85112}'));
+        }
+
+        $immutable = new ImmutableAutoPrimaryKeyEntity('pk-already-persisted');
+        try {
+            data_persist($immutable);
+            $exception = null;
+        } catch (Exception $exception) {
+        } finally {
+            self::assertNull($exception);
+            self::assertNotEquals('pk-already-persisted', $immutable->getPrimaryKey());
+        }
+
+        $immutable = new ReverencedImmutableEntity('pk-already-persisted');
+        $proxy = new ImmutableProxy('proxy-key');
+        di_get(DataStore::class)->attach($proxy);
+        $immutable->setProxy($proxy);
+        try {
+            data_persist($immutable);
+            $exception = null;
+        } catch (Exception $exception) {
+        } finally {
+            self::assertNull($exception);
+            self::assertNotEquals('pk-already-persisted', $immutable->getPrimaryKey());
+            self::assertEquals($proxy->getLastPersistedReferencePK(), $immutable->getPrimaryKey());
+        }
+
+        $immutable = new ReverencedImmutableEntity('pk-not-persisted');
+        $proxy = new ImmutableProxy('proxy-key');
+        di_get(DataStore::class)->attach($proxy);
+        $immutable->setProxy($proxy);
+        try {
+            data_persist($immutable);
+            $exception = null;
+        } catch (Exception $exception) {
+        } finally {
+            self::assertNull($exception);
+            self::assertEquals('pk-not-persisted', $immutable->getPrimaryKey());
+            self::assertEquals($proxy->getLastPersistedReferencePK(), $immutable->getPrimaryKey());
+        }
+        $immutable->setPrimaryKey('second-pk-not-persisted');
+        try {
+            data_persist($immutable);
+            $exception = null;
+        } catch (Exception $exception) {
+        } finally {
+            self::assertNull($exception);
+            self::assertEquals('second-pk-not-persisted', $immutable->getPrimaryKey());
+            self::assertEquals($proxy->getLastPersistedReferencePK(), $immutable->getPrimaryKey());
+        }
+
+        $immutableUG = new ReverencedByGenericImmutableEntity('pk-not-persisted');
+        data_persist($immutableUG);
+        /** @var GenericMutableEntityReference $genericEntity */
+        $genericEntity = data_load($immutableUG->getMutableReverenceClass(), $immutableUG->getMutableReverenceKey());
+        self::assertSame($immutableUG, $genericEntity->getMutableReverenceTarget());
     }
 }

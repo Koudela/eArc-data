@@ -14,9 +14,32 @@ namespace {
 
     class MyEmbeddedEntity extends AbstractEmbeddedEntity
     {
+        public string $name;
+        protected string $city;
+        private int $age;
+
         public function __construct(...$args)
         {
+            $this->name = $args[0];
+            $this->city = $args[1];
+            $this->age = $args[2];
+
             unset($args);
+        }
+
+        public function getName(): string
+        {
+            return $this->name;
+        }
+
+        public function getCity(): string
+        {
+            return $this->city;
+        }
+
+        public function getAge(): int
+        {
+            return $this->age;
         }
     }
 }

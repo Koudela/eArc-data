@@ -86,7 +86,6 @@ class EntitySaveStack implements EntitySaveStackInterface
                     }
                 } catch (NoDataException $noDataException) {
                     // we can go on and save the immutable entity as the primary key is not in use
-                    unset($noDataException);
                 }
             }
 
@@ -173,14 +172,14 @@ class EntitySaveStack implements EntitySaveStackInterface
     protected function processMutableReverenceKeyInterface(MutableReverenceKeyInterface $entity): void
     {
         $reverenceEntityClass = $entity->getMutableReverenceClass();
-        if (!$reverenceEntityClass instanceof MutableEntityReferenceInterface) {
+        if (!is_subclass_of($reverenceEntityClass, MutableEntityReferenceInterface::class)) {
             throw new DataException(sprintf(
-                '{8c33749e-f11b-4f64-9054-c409ad637fb2} The `getMutableReverenceClass()` method of the %s has to return the fully qualified class name of a class implementing the %s.',
+                '{a010c72d-2527-462f-a9db-96ae5ca7e249} The `getMutableReverenceClass()` method of the %s has to return the fully qualified class name of a class implementing the %s.',
                 MutableReverenceKeyInterface::class,
                 MutableEntityReferenceInterface::class
             ));
         }
-        if ($reverenceEntityClass instanceof ImmutableEntityInterface) {
+        if (is_subclass_of($reverenceEntityClass, ImmutableEntityInterface::class)) {
             throw new DataException(sprintf(
                 '{8c33749e-f11b-4f64-9054-c409ad637fb2} The `getMutableReverenceClass()` method of the %s must not return the fully qualified class name of a class implementing the %s.',
                 MutableReverenceKeyInterface::class,
