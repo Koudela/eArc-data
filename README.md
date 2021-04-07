@@ -101,8 +101,8 @@ use eArc\Data\Initializer;
 Initializer::init();
 ```
 
-Then register your persistence infrastructure to the `onLoad`, `onSave` and `onRemove` 
-events.
+Then register your persistence infrastructure to the `onLoad`, `onPersit`, `onRemove`,
+`onFind` and `onAutoPrimaryKey` events.
 
 ```php
 use eArc\Data\ParameterInterface;
