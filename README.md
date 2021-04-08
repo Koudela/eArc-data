@@ -561,7 +561,7 @@ tag and an interface:
 Any library implementing this five interfaces is a valid bridge for earc/data. 
 
 Some library will only implement a subset. Think of a search index. Only the 
-data persist/remove events are relevant for it.
+data persist/remove/find events are relevant for it.
 
 There exist some prebuild bridges:
 - [redis bridge](https://github.com/Koudela/eArc-data-redis) key-value based database server used for caching
