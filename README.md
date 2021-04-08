@@ -52,7 +52,8 @@ section for a deeper insight.
     - [on data find](#on-data-find)
     - [on primary key generation](#on-primary-key-generation)
 - [releases](#releases)
-    - [release v0.0](#release-v00)
+    - [release v0.1 (beta)](#release-01-pre-release)
+    - [release v0.0](#release-00)
 
 ## pro/cons
 
@@ -73,7 +74,6 @@ persisting a couple of entities.
 - **support for all standard dependency enrichment techniques** - like pre/post
   load/persist/remove events, wakeup/sleep events, cascading removals/updates.
 - **support for immutables**
-- **atomic writes** for the complete persistence infrastructure 
 - **write transactions** for the complete persistence infrastructure
 - **extendable** - integrates with nearly all kinds of persistence handling.
 
@@ -859,12 +859,11 @@ string. Of course this must be recognised by the on data persist services.
 
 ## releases
 
-### release v0.1
+### release 0.1 (pre-release)
 
-* atomic writes
-* write transactions
+* transactions (beta - documentation in code only, no tests, interfaces may change)
 
-### release v0.0
+### release 0.0
 
 * the first official release
 * PHP ^8.0 support

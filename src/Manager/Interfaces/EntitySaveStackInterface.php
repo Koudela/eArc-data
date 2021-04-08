@@ -32,4 +32,14 @@ interface EntitySaveStackInterface
      * @param EntityInterface[] $entities
      */
     public function persist(array $entities): void;
+
+    /**
+     * Creates/updates the persisted data the entities relates to. May create
+     * the primary key if a entity was not persisted yet.
+     *
+     * Does not take the scheduled entities in account.
+     *
+     * @param EntityInterface[] $entities
+     */
+    public function directPersist(array $entities): void;
 }

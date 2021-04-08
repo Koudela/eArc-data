@@ -21,12 +21,20 @@ use eArc\Data\Exceptions\NoDataException;
 use eArc\Data\Manager\Interfaces\DataStoreInterface;
 use eArc\Data\Manager\Interfaces\Events\OnLoadInterface;
 use eArc\Data\Manager\Interfaces\Events\OnRemoveInterface;
+use eArc\Data\Manager\Interfaces\TransactionStoreInterface;
 use eArc\Data\ParameterInterface;
 
 class DataStore implements DataStoreInterface
 {
     /** @var EntityInterface[][] */
     protected array $entities = [];
+
+    protected TransactionStoreInterface $transactionStore;
+
+    public function __construct()
+    {
+        $this->transactionStore = di_get(TransactionStore::class);
+    }
 
     public function load(string $fQCN, array $primaryKeys, int $flag = 0): array
     {
@@ -177,6 +185,11 @@ class DataStore implements DataStoreInterface
 
     public function remove(string $fQCN, array $primaryKeys, bool $force = false): void
     {
+        if ($this->transactionStore->transactionIsOpen()) {
+            $this->transactionStore->transactionAddRemoveItem($fQCN, $primaryKeys, $force);
+
+            return;
+        }
         if (!$force && is_subclass_of($fQCN, ImmutableEntityInterface::class)) {
             throw new DataException(
                 '{2055c126-1148-4c8b-ab1e-e607e9e919d4} The force flag has to been set in order to remove the data of an immutable entity.'

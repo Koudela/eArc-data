@@ -25,8 +25,9 @@ namespace {
         /**
          * Registers the functions `data_load`, `data_load_batch`, `data_persist`,
          * `data_persist_batch`, `data_delete`, `data_delete_batch`, `data_remove`,
-         * `data_remove_batch`, `data_schedule`, `data_schedule_batch`, `data_detach`
-         * and `data_find`, `data_find_entities`.
+         * `data_remove_batch`, `data_schedule`, `data_schedule_batch`, `data_detach`,
+         * `data_find`, `data_find_entities`, `data_transaction_start`, `data_transaction_commit`
+         * and `data_transaction_clear`.
          */
         public static function init(): void
         {
@@ -149,6 +150,34 @@ namespace {
                     function data_find_entities(string $fQCN, array $keyValuePairs = []): array
                     {
                         return data_load_batch($fQCN, data_find($fQCN, $keyValuePairs));
+                    }
+                }
+
+                if (!function_exists('data_transaction_start')) {
+                    function data_transaction_start(): bool
+                    {
+                        return di_get(DataStore::class)->transactionStart();
+                    }
+                }
+
+                if (!function_exists('data_transaction_commit')) {
+                    function data_transaction_commit(): void
+                    {
+                        di_get(DataStore::class)->transactionCommit();
+                    }
+                }
+
+                if (!function_exists('data_transaction_rollback')) {
+                    function data_transaction_rollback(): void
+                    {
+                        di_get(DataStore::class)->transactionRollback();
+                    }
+                }
+
+                if (!function_exists('data_transaction_clear')) {
+                    function data_transaction_clear(): void
+                    {
+                        di_get(DataStore::class)->transactionClear();
                     }
                 }
             }

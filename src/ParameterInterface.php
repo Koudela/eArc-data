@@ -21,6 +21,7 @@ use eArc\Data\Manager\Interfaces\Events\OnFindInterface;
 use eArc\Data\Manager\Interfaces\Events\OnLoadInterface;
 use eArc\Data\Manager\Interfaces\Events\OnPersistInterface;
 use eArc\Data\Manager\Interfaces\Events\OnRemoveInterface;
+use eArc\Data\Manager\Interfaces\Events\OnTransactionInterface;
 
 interface ParameterInterface
 {
@@ -37,4 +38,6 @@ interface ParameterInterface
     const TAG_ON_PERSIST = OnPersistInterface::class;
     const TAG_ON_REMOVE = OnRemoveInterface::class;
     const TAG_ON_FIND = OnFindInterface::class;
+
+    const TAG_ON_TRANSACTION = OnTransactionInterface::class;
 }

@@ -22,6 +22,7 @@ use eArc\Data\Exceptions\NoDataException;
 use eArc\Data\Manager\Interfaces\EntitySaveStackInterface;
 use eArc\Data\Manager\Interfaces\Events\OnAutoPrimaryKeyInterface;
 use eArc\Data\Manager\Interfaces\Events\OnPersistInterface;
+use eArc\Data\Manager\Interfaces\TransactionStoreInterface;
 use eArc\Data\ParameterInterface;
 use function data_persist;
 
@@ -29,6 +30,12 @@ class EntitySaveStack implements EntitySaveStackInterface
 {
     /** @var EntityInterface[] */
     protected array $entitySaveStack = [];
+    protected TransactionStoreInterface $transactionStore;
+
+    public function __construct()
+    {
+        $this->transactionStore = di_get(TransactionStore::class);
+    }
 
     public function schedule(EntityInterface $entity): void
     {
@@ -37,6 +44,12 @@ class EntitySaveStack implements EntitySaveStackInterface
 
     public function persist(array $entities): void
     {
+        if ($this->transactionStore->transactionIsOpen()) {
+            $this->transactionStore->transactionAddPersistItem($entities);
+
+            return;
+        }
+
         foreach ($entities as $entity) {
             $this->schedule($entity);
         }
@@ -45,13 +58,10 @@ class EntitySaveStack implements EntitySaveStackInterface
 
         $this->entitySaveStack = [];
 
-        $this->save($entities);
+        $this->directPersist($entities);
     }
 
-    /**
-     * @param EntityInterface[] $entities
-     */
-    protected function save(array $entities): void
+    public function directPersist(array $entities): void
     {
         foreach ($entities as $entity) {
             foreach (di_get_tagged(ParameterInterface::TAG_PRE_PERSIST) as $service => $args) {
@@ -86,6 +96,7 @@ class EntitySaveStack implements EntitySaveStackInterface
                     }
                 } catch (NoDataException $noDataException) {
                     // we can go on and save the immutable entity as the primary key is not in use
+                    unset($noDataException);
                 }
             }
 
