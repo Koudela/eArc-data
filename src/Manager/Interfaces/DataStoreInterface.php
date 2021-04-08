@@ -15,20 +15,26 @@ use eArc\Data\Exceptions\Interfaces\NoDataExceptionInterface;
 
 interface DataStoreInterface
 {
+    const LOAD_FLAG_USE_FIRST_LEVEL_CACHE_ONLY = 1;
+    const LOAD_FLAG_SKIP_FIRST_LEVEL_CACHE = 2;
+
     /**
      * Get the entity objects the fully qualified class name and the primary keys
-     * relate to. If the useDataStoreOnly flag is set and only entities loaded
-     * already are returned.
+     * relate to. If the `LOAD_FLAG_USE_FIRST_LEVEL_CACHE_ONLY` flag is used only
+     * entities loaded already are returned. The
+     * `LOAD_FLAG_LOAD_FLAG_SKIP_FIRST_LEVEL_CACHE` does not look up the already
+     * loaded entities and does not add the loaded entities to the already loaded
+     * ones.
      *
      * @param string $fQCN
      * @param string[] $primaryKeys
-     * @param bool $useDataStoreOnly
+     * @param int $flag
      *
      * @return EntityInterface[]
      *
      * @throws NoDataExceptionInterface
      */
-    public function load(string $fQCN, array $primaryKeys, bool $useDataStoreOnly = false): array;
+    public function load(string $fQCN, array $primaryKeys, int $flag = 0): array;
 
     /**
      * Checks whether the entity object the fully qualified class name and

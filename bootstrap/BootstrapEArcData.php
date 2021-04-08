@@ -35,18 +35,18 @@ namespace {
             }
 
             if (!function_exists('data_load')) {
-                function data_load(string $fQCN, string $primaryKey, bool $useDataStoreOnly = false): mixed
+                function data_load(string $fQCN, string $primaryKey, int $flag = 0): mixed
                 {
-                    $result = di_get(DataStore::class)->load($fQCN, [$primaryKey], $useDataStoreOnly);
+                    $result = di_get(DataStore::class)->load($fQCN, [$primaryKey], $flag);
 
                     return array_pop($result);
                 }
             }
 
             if (!function_exists('data_load_batch')) {
-                function data_load_batch(string $fQCN, array $primaryKeys, bool $useDataStoreOnly = false): array
+                function data_load_batch(string $fQCN, array $primaryKeys, int $flag = 0): array
                 {
-                    return di_get(DataStore::class)->load($fQCN, $primaryKeys, $useDataStoreOnly);
+                    return di_get(DataStore::class)->load($fQCN, $primaryKeys, $flag);
                 }
             }
 

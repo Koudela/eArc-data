@@ -73,6 +73,8 @@ persisting a couple of entities.
 - **support for all standard dependency enrichment techniques** - like pre/post
   load/persist/remove events, wakeup/sleep events, cascading removals/updates.
 - **support for immutables**
+- **atomic writes** for the complete persistence infrastructure 
+- **write transactions** for the complete persistence infrastructure
 - **extendable** - integrates with nearly all kinds of persistence handling.
 
 ### cons
@@ -373,6 +375,12 @@ are provided.
 You can change this behaviour by calling `data_detach` in between. Please note the
 resulting behaviour might be unexpected for inattentive developers. Use with great
 care.
+
+`data_load` takes a third facultative flag. If it is set to `DataStoreInterface::LOAD_FLAG_USE_FIRST_LEVEL_CACHE_ONLY`,
+only entities already loaded are returned. If it is set to `DataStoreInterface::LOAD_FLAG_SKIP_FIRST_LEVEL_CACHE`,
+earc/data does not look up the already loaded entities and does not add the loaded 
+entities to the already loaded ones - the retrieved entities are in a detached state
+and will be another instance than the same entities loaded before or after that.
 
 There is a `data_load_batch` function to load multiple entities at once.
 
@@ -850,6 +858,11 @@ which generates the key. In these cases the method has to return an empty
 string. Of course this must be recognised by the on data persist services.
 
 ## releases
+
+### release v0.1
+
+* atomic writes
+* write transactions
 
 ### release v0.0
 

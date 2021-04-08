@@ -14,6 +14,7 @@ use eArc\Data\Entity\GenericMutableEntityReference;
 use eArc\Data\Exceptions\DataException;
 use eArc\Data\Initializer;
 use eArc\Data\Manager\DataStore;
+use eArc\Data\Manager\Interfaces\DataStoreInterface;
 use eArc\Data\ParameterInterface;
 use eArc\DataTests\env\Counter;
 use eArc\DataTests\env\ImmutableAutoPrimaryKeyEntity;
@@ -118,20 +119,37 @@ class TestDataManager extends TestCase
         $this->assertionsLoadEvents(8, $entity);
     }
 
-    public function assertionsLoadEvents(int $cnt, MyEntity $entity): void
+    public function assertionsLoadEvents(int $cnt, MyEntity|null $entity): void
     {
         self::assertEquals($cnt + 1, TaggedService::$preLoadCalledCorrectly);
         self::assertEquals($cnt + 2, MyEntity::$preLoadCalledCorrectly);
         self::assertEquals($cnt + 3, di_get(MyCacheBridge::class)->onLoadCalledCorrectly);
         self::assertEquals($cnt + 4, di_get(MyDataBaseBridge::class)->onLoadCalledCorrectly);
         self::assertEquals($cnt + 5, di_get(TaggedService::class)->postLoadCalledCorrectly);
-        self::assertEquals($cnt + 6, $entity->postLoadCalledCorrectly);
+        if (!is_null($entity)) {
+            self::assertEquals($cnt + 6, $entity->postLoadCalledCorrectly);
+        }
         self::assertEquals($cnt + 7, di_get(MyCacheBridge::class)->postLoadCallablesCalledCorrectly);
         self::assertEquals($cnt + 8, di_get(MyDataBaseBridge::class)->postLoadCallablesCalledCorrectly);
         self::assertEquals(0, di_get(MyCacheBridge::class)->onPersistCalledCorrectly);
         self::assertEquals(0, di_get(MyDataBaseBridge::class)->onAutoPrimaryKeyCalledCorrectly);
         self::assertEquals(0, di_get(MySearchIndexBridge::class)->onRemoveCalledCorrectly);
         self::assertEquals(0, di_get(MySearchIndexBridge::class)->onFindCalledCorrectly);
+    }
+
+    public function testLoadFlags(): void
+    {
+        $this->init();
+
+        Counter::$cnt = 0;
+        $entity = data_load(MyEntity::class, 'my-pk-1');
+        $this->assertionsLoadEvents(0, $entity);
+        $entity = data_load(MyEntity::class, 'my-pk-1');
+        $this->assertionsLoadEvents(0, $entity);
+        $entity = data_load(MyEntity::class, 'my-pk-2', DataStoreInterface::LOAD_FLAG_USE_FIRST_LEVEL_CACHE_ONLY);
+        $this->assertionsLoadEvents(0, $entity);
+        $entity = data_load(MyEntity::class, 'my-pk-1', DataStoreInterface::LOAD_FLAG_SKIP_FIRST_LEVEL_CACHE);
+        $this->assertionsLoadEvents(8, $entity);
     }
 
     public function testRemoveEvents(): void

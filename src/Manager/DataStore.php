@@ -28,16 +28,16 @@ class DataStore implements DataStoreInterface
     /** @var EntityInterface[][] */
     protected array $entities = [];
 
-    public function load(string $fQCN, array $primaryKeys, bool $useDataStoreOnly = false): array
+    public function load(string $fQCN, array $primaryKeys, int $flag = 0): array
     {
         $entities = [];
         $primaryKeysToLoad = [];
 
         foreach (array_flip($primaryKeys) as $primaryKey => $value) {
-            if ($this->isLoaded($fQCN, $primaryKey)) {
+            if (DataStoreInterface::LOAD_FLAG_SKIP_FIRST_LEVEL_CACHE !== $flag && $this->isLoaded($fQCN, $primaryKey)) {
                 $entities[$primaryKey] = $this->entities[$fQCN][$primaryKey];
             } else {
-                if ($useDataStoreOnly) {
+                if (DataStoreInterface::LOAD_FLAG_USE_FIRST_LEVEL_CACHE_ONLY === $flag) {
                     continue;
                 }
 
@@ -121,7 +121,9 @@ class DataStore implements DataStoreInterface
                 $entity->postLoad($entity);
             }
 
-            $this->entities[$fQCN][$primaryKey] = $entity;
+            if (DataStoreInterface::LOAD_FLAG_SKIP_FIRST_LEVEL_CACHE !== $flag) {
+                $this->entities[$fQCN][$primaryKey] = $entity;
+            }
         }
 
         foreach ($postLoadCallables as $postLoadCallable) {
