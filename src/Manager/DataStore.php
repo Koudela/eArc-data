@@ -41,8 +41,10 @@ class DataStore implements DataStoreInterface
         $entities = [];
         $primaryKeysToLoad = [];
 
-        foreach (array_flip($primaryKeys) as $primaryKey => $value) {
-            if (DataStoreInterface::LOAD_FLAG_SKIP_FIRST_LEVEL_CACHE !== $flag && $this->isLoaded($fQCN, $primaryKey)) {
+        foreach ($primaryKeys as $primaryKey) {
+            if (array_key_exists($primaryKey, $entities) || array_key_exists($primaryKey, $primaryKeysToLoad)) {
+                continue;
+            } elseif (DataStoreInterface::LOAD_FLAG_SKIP_FIRST_LEVEL_CACHE !== $flag && $this->isLoaded($fQCN, $primaryKey)) {
                 $entities[$primaryKey] = $this->entities[$fQCN][$primaryKey];
             } else {
                 if (DataStoreInterface::LOAD_FLAG_USE_FIRST_LEVEL_CACHE_ONLY === $flag) {

@@ -11,25 +11,23 @@
 namespace eArc\Data\Collection;
 
 use eArc\Data\Collection\Interfaces\CollectionBaseInterface;
-use eArc\Data\Entity\Interfaces\EntityBaseInterface;
+use eArc\Data\Entity\EmbeddedEntityTrait;
+use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
+use eArc\Data\Entity\Interfaces\EntityInterface;
 use eArc\Data\Repository\Interfaces\RepositoryBaseInterface;
 use Generator;
 
 abstract class AbstractBaseCollection implements CollectionBaseInterface, RepositoryBaseInterface
 {
-    protected EntityBaseInterface $owner;
+    use EmbeddedEntityTrait;
+
     protected string $fQCN;
     protected array $items = [];
 
-    public function __construct(EntityBaseInterface $owner, string $fQCN)
+    public function __construct(EntityInterface|EmbeddedEntityInterface $ownerEntity, string $fQCN)
     {
-        $this->owner = $owner;
+        $this->ownerEntity = $ownerEntity;
         $this->fQCN = $fQCN;
-    }
-
-    public function getOwner(): EntityBaseInterface
-    {
-        return $this->owner;
     }
 
     public function asArray(): array

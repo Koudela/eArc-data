@@ -11,25 +11,8 @@
 namespace eArc\Data\Entity;
 
 use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
-use eArc\Data\Entity\Interfaces\EntityInterface;
 
 abstract class AbstractEmbeddedEntity implements EmbeddedEntityInterface
 {
-    protected EntityInterface|EmbeddedEntityInterface $ownerEntity;
-
-    public function getRootEntity(): EntityInterface
-    {
-        $entity = $this->getOwnerEntity();
-
-        while ($entity instanceof EmbeddedEntityInterface) {
-            $entity = $entity->getOwnerEntity();
-        }
-
-        return $entity;
-    }
-
-    public function getOwnerEntity(): EntityInterface|EmbeddedEntityInterface
-    {
-        return $this->ownerEntity;
-    }
- }
+    use EmbeddedEntityTrait;
+}

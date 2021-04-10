@@ -59,15 +59,17 @@ class EmbeddedCollection extends AbstractBaseCollection implements EmbeddedColle
 
     public function add(EmbeddedEntityInterface $embeddedEntity): EmbeddedCollectionInterface
     {
-        if ($this->fQCN !== get_class($embeddedEntity)) {
+        if ($this->fQCN !== $embeddedEntity::class) {
             throw new HomogeneityException(sprintf(
                 '{4ba1156d-a0aa-48fa-906b-4a30d5d003a3} Embedded entity of type %s cannot be added to a embedded collection of type %s.',
-                get_class($embeddedEntity),
+                $embeddedEntity::class,
                 $this->fQCN
             ));
         }
 
         $this->items[spl_object_id($embeddedEntity)] = $embeddedEntity;
+
+        $embeddedEntity->setOwnerEntity($this);
 
         return $this;
     }
@@ -83,6 +85,8 @@ class EmbeddedCollection extends AbstractBaseCollection implements EmbeddedColle
         }
 
         unset($this->items[spl_object_id($embeddedEntity)]);
+
+        $embeddedEntity->setOwnerEntity(null);
 
         return $this;
     }

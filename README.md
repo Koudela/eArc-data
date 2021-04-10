@@ -52,8 +52,8 @@ section for a deeper insight.
     - [on data find](#on-data-find)
     - [on primary key generation](#on-primary-key-generation)
 - [releases](#releases)
-    - [release v0.1 (beta)](#release-01-pre-release)
-    - [release v0.0](#release-00)
+    - [release 0.0.1](#release-001)
+    - [release 0.0](#release-00)
 
 ## pro/cons
 
@@ -859,9 +859,12 @@ string. Of course this must be recognised by the on data persist services.
 
 ## releases
 
-### release 0.1 (pre-release)
+### release 0.0.1
 
 * transactions (beta - documentation in code only, no tests, interfaces may change)
+* `CollectionBaseInterface` implements `EmbeddedEntityInterface`
+* added `setOwnerEntity()` method to `EmbeddedEntityInterface`
+* removed `getOwner()` method from `CollectionBaseInterface`
 
 ### release 0.0
 

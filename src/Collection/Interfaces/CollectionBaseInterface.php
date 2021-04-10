@@ -10,16 +10,12 @@
 
 namespace eArc\Data\Collection\Interfaces;
 
+use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
 use eArc\Data\Entity\Interfaces\EntityBaseInterface;
 use IteratorAggregate;
 
-interface CollectionBaseInterface extends IteratorAggregate
+interface CollectionBaseInterface extends IteratorAggregate, EmbeddedEntityInterface
 {
-    /**
-     * @return EntityBaseInterface The entity the collection is a property of.
-     */
-    public function getOwner(): EntityBaseInterface;
-
     /**
      * Hint: Consider using the iterator instead.
      *
